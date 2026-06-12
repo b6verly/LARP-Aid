@@ -215,6 +215,16 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 [data-theme="dark"] #site-footer         { background: var(--color-bg-secondary); border-color: var(--color-border); }
 [data-theme="dark"] #topbar              { border-color: var(--color-border); }
 
+/* ── Decision tree cards (EMS + LEO) — dark mode ── */
+/* The card outer div uses class dtree-card; step rows use dtree-step;
+   the radio call box uses dtree-radio. These classes are injected by
+   runEmsTree / runLeoTree so CSS can override the inline light colours. */
+[data-theme="dark"] .dtree-card          { background: #1E293B !important; border-color: #475569 !important; }
+[data-theme="dark"] .dtree-step          { border-bottom-color: rgba(255,255,255,.07) !important; color: var(--color-text) !important; }
+[data-theme="dark"] .dtree-step span:last-child { color: var(--color-text-2) !important; }
+[data-theme="dark"] .dtree-radio         { background: rgba(255,255,255,.05) !important; color: var(--color-text-2) !important; }
+[data-theme="dark"] .dtree-section-label { color: var(--color-text-2) !important; }
+
 /* ── Reset & base ── */
 * { box-sizing: border-box; }
 body { margin: 0; }
@@ -3347,26 +3357,26 @@ var EMS_COMPLAINT_MODS = {
   /* Cardiac */
   chestpain:        [{v:'stemi_suspected',l:'STEMI suspected on 12-lead'},{v:'inferior_stemi',l:'Inferior STEMI — leads II/III/aVF'},{v:'chf_suspected',l:'Suspected CHF / pulmonary edema'},{v:'known_cardiac',l:'Known cardiac hx / prior MI'},{v:'pacemaker',l:'ICD / pacemaker implanted'},{v:'diabetic',l:'Known diabetic — silent MI risk'},{v:'anticoag',l:'On anticoagulants (warfarin/Xarelto)'},{v:'geriatric',l:'Geriatric patient (65+)'},{v:'unstable_vitals',l:'Unstable vitals on arrival'}],
   palpitations:     [{v:'known_cardiac',l:'Known dysrhythmia / cardiac history'},{v:'pacemaker',l:'ICD / pacemaker present'},{v:'unstable_vitals',l:'Hemodynamically unstable (hypotensive)'},{v:'geriatric',l:'Geriatric patient (65+)'},{v:'pregnant',l:'Pregnant patient'},{v:'diabetic',l:'Known diabetic'},{v:'multi_substance',l:'Stimulant / caffeine / substance use'}],
-  cardiac_arrest:   [{v:'hypothermic_arrest',l:'Hypothermic arrest — "not dead until warm"'},{v:'known_cardiac',l:'Known cardiac history'},{v:'pacemaker',l:'ICD / pacemaker implanted'},{v:'pediatric',l:'Pediatric patient (<12)'},{v:'pregnant',l:'Pregnant patient'},{v:'fentanyl_involved',l:'Suspected opioid involvement'},{v:'high_moi',l:'Traumatic cardiac arrest'},{v:'unstable_vitals',l:'ROSC achieved — now unstable'}],
+  cardiac_arrest:   [{v:'hypothermic_arrest',l:'Hypothermic arrest — "not dead until warm"'},{v:'known_cardiac',l:'Known cardiac history'},{v:'pacemaker',l:'ICD / pacemaker implanted'},{v:'pediatric',l:'Pediatric patient (under 12)'},{v:'pregnant',l:'Pregnant patient'},{v:'fentanyl_involved',l:'Suspected opioid involvement'},{v:'high_moi',l:'Traumatic cardiac arrest'},{v:'unstable_vitals',l:'ROSC achieved — now unstable'}],
   syncope:          [{v:'known_cardiac',l:'Known cardiac history'},{v:'geriatric',l:'Geriatric — fall / injury on LOC'},{v:'anticoag',l:'On anticoagulants'},{v:'diabetic',l:'Known diabetic — glucose check'},{v:'pregnant',l:'Pregnant patient'},{v:'post_trauma_ms',l:'Head trauma occurred during fall'},{v:'exertional_heat',l:'Exertional / heat-related'},{v:'unstable_vitals',l:'Prolonged LOC / vitals abnormal'}],
-  hypertension:     [{v:'tpa_window',l:'Neuro symptoms — possible stroke'},{v:'known_cardiac',l:'Known cardiac history'},{v:'geriatric',l:'Geriatric patient'},{v:'pregnant',l:'Pregnant — possible preeclampsia'},{v:'preeclampsia',l:'Preeclampsia / eclampsia signs present'},{v:'pacemaker',l:'ICD / pacemaker present'},{v:'unstable_vitals',l:'BP >220/120 or symptomatic'}],
+  hypertension:     [{v:'tpa_window',l:'Neuro symptoms — possible stroke'},{v:'known_cardiac',l:'Known cardiac history'},{v:'geriatric',l:'Geriatric patient'},{v:'pregnant',l:'Pregnant — possible preeclampsia'},{v:'preeclampsia',l:'Preeclampsia / eclampsia signs present'},{v:'pacemaker',l:'ICD / pacemaker present'},{v:'unstable_vitals',l:'BP 220/120+ or symptomatic'}],
   /* Respiratory */
-  dyspnea:          [{v:'cpap_eligible',l:'CPAP candidate'},{v:'chf_suspected',l:'Suspected CHF / bilateral crackles'},{v:'severe_asthma',l:'Severe / near-fatal asthma signs'},{v:'copd_exacc',l:'Known COPD exacerbation'},{v:'fire_rescue',l:'Structure fire / smoke exposure'},{v:'geriatric',l:'Geriatric patient'},{v:'pediatric',l:'Pediatric patient'},{v:'pregnant',l:'Pregnant patient'},{v:'unstable_vitals',l:'SpO2 <85% / deteriorating'}],
+  dyspnea:          [{v:'cpap_eligible',l:'CPAP candidate'},{v:'chf_suspected',l:'Suspected CHF / bilateral crackles'},{v:'severe_asthma',l:'Severe / near-fatal asthma signs'},{v:'copd_exacc',l:'Known COPD exacerbation'},{v:'fire_rescue',l:'Structure fire / smoke exposure'},{v:'geriatric',l:'Geriatric patient'},{v:'pediatric',l:'Pediatric patient'},{v:'pregnant',l:'Pregnant patient'},{v:'unstable_vitals',l:'SpO2 85% or below / deteriorating'}],
   wheezing:         [{v:'severe_asthma',l:'Silent chest — near-fatal asthma'},{v:'cpap_eligible',l:'CPAP candidate'},{v:'copd_exacc',l:'Known COPD (not asthma)'},{v:'pediatric',l:'Pediatric patient'},{v:'pregnant',l:'Pregnant patient'},{v:'unstable_vitals',l:'Deteriorating despite treatment'},{v:'fire_rescue',l:'Smoke / irritant inhalation trigger'}],
-  choking:          [{v:'pediatric',l:'Infant / pediatric patient (<12)'},{v:'pregnant',l:'Pregnant — modified Heimlich'},{v:'morbid_obesity',l:'Morbid obesity — modified technique'},{v:'geriatric',l:'Geriatric — frail / fragile'},{v:'unstable_vitals',l:'Becoming unconscious'}],
+  choking:          [{v:'pediatric',l:'Infant / pediatric patient (under 12)'},{v:'pregnant',l:'Pregnant — modified Heimlich'},{v:'morbid_obesity',l:'Morbid obesity — modified technique'},{v:'geriatric',l:'Geriatric — frail / fragile'},{v:'unstable_vitals',l:'Becoming unconscious'}],
   smoke_inhalation: [{v:'fire_rescue',l:'Structure fire / extended exposure'},{v:'co_exposure',l:'CO poisoning suspected'},{v:'pediatric',l:'Pediatric patient'},{v:'unstable_vitals',l:'Stridor / airway compromise present'},{v:'blast_injury',l:'Blast / explosion involved'},{v:'geriatric',l:'Geriatric patient'}],
   /* Neuro */
   altered_ms:       [{v:'diabetic',l:'Known diabetic — glucose first priority'},{v:'fentanyl_involved',l:'Suspected opioid OD'},{v:'post_trauma_ms',l:'Trauma mechanism / TBI suspected'},{v:'co_exposure',l:'CO poisoning possible'},{v:'geriatric',l:'Geriatric — atypical presentation'},{v:'pediatric',l:'Pediatric patient'},{v:'combative',l:'Combative / agitated'},{v:'unstable_vitals',l:'Rapidly deteriorating'}],
-  seizure:          [{v:'status_epilepticus',l:'Seizure >5 min — status epilepticus'},{v:'known_epileptic',l:'Known seizure disorder on meds'},{v:'diabetic',l:'Known diabetic — hypoglycemia cause?'},{v:'pregnant',l:'Pregnant — eclampsia suspected'},{v:'preeclampsia',l:'Eclampsia confirmed'},{v:'post_trauma_ms',l:'Post-traumatic seizure'},{v:'pediatric',l:'Pediatric / febrile seizure'},{v:'fentanyl_involved',l:'Drug-related seizure'},{v:'unstable_vitals',l:'Not postictal — continuous seizure'}],
-  stroke:           [{v:'tpa_window',l:'Last known normal <4.5 hours'},{v:'anticoag',l:'On anticoagulants — affects tPA'},{v:'known_cardiac',l:'Known AFib / cardiac source'},{v:'diabetic',l:'Known diabetic — hypoglycemia mimic?'},{v:'geriatric',l:'Geriatric patient'},{v:'hypertension',l:'Severe hypertension present'},{v:'unstable_vitals',l:'Hemodynamically unstable'}],
+  seizure:          [{v:'status_epilepticus',l:'Seizure 5+ min — status epilepticus'},{v:'known_epileptic',l:'Known seizure disorder on meds'},{v:'diabetic',l:'Known diabetic — hypoglycemia cause?'},{v:'pregnant',l:'Pregnant — eclampsia suspected'},{v:'preeclampsia',l:'Eclampsia confirmed'},{v:'post_trauma_ms',l:'Post-traumatic seizure'},{v:'pediatric',l:'Pediatric / febrile seizure'},{v:'fentanyl_involved',l:'Drug-related seizure'},{v:'unstable_vitals',l:'Not postictal — continuous seizure'}],
+  stroke:           [{v:'tpa_window',l:'Last known normal under 4.5 hours'},{v:'anticoag',l:'On anticoagulants — affects tPA'},{v:'known_cardiac',l:'Known AFib / cardiac source'},{v:'diabetic',l:'Known diabetic — hypoglycemia mimic?'},{v:'geriatric',l:'Geriatric patient'},{v:'hypertension',l:'Severe hypertension present'},{v:'unstable_vitals',l:'Hemodynamically unstable'}],
   headache_severe:  [{v:'tpa_window',l:'Thunderclap — subarachnoid hemorrhage?'},{v:'anticoag',l:'On anticoagulants'},{v:'known_cardiac',l:'Known cardiac / AFib'},{v:'geriatric',l:'Geriatric patient'},{v:'pregnant',l:'Pregnant — preeclampsia?'},{v:'preeclampsia',l:'Preeclampsia signs present'},{v:'unstable_vitals',l:'Neuro deficits / LOC present'}],
   unresponsive:     [{v:'diabetic',l:'Known diabetic'},{v:'fentanyl_involved',l:'Opioid overdose suspected'},{v:'post_trauma_ms',l:'Trauma mechanism present'},{v:'co_exposure',l:'CO exposure possible'},{v:'known_cardiac',l:'Known cardiac history'},{v:'geriatric',l:'Geriatric patient'},{v:'pediatric',l:'Pediatric patient'},{v:'hypothermic_arrest',l:'Hypothermia suspected'},{v:'combative',l:'Became unresponsive from agitated state'}],
   /* Trauma */
   mvc_trauma:       [{v:'high_moi',l:'High MOI — rollover / ejection / fatality at scene'},{v:'spinal_precautions',l:'Spinal injury suspected'},{v:'anticoag',l:'On anticoagulants'},{v:'pediatric',l:'Pediatric patient'},{v:'pregnant',l:'Pregnant patient'},{v:'geriatric',l:'Geriatric — fragile bones'},{v:'unstable_vitals',l:'Hemorrhagic shock signs'},{v:'penetrating_torso',l:'Penetrating injury found on exam'},{v:'multi_substance',l:'Suspected intoxication (OWI)'}],
   gsw:              [{v:'penetrating_torso',l:'Torso / junctional wound'},{v:'high_moi',l:'Multiple wounds / close range / rifle'},{v:'anticoag',l:'On anticoagulants'},{v:'unstable_vitals',l:'Hemorrhagic shock signs'},{v:'pediatric',l:'Pediatric patient'},{v:'combative',l:'Scene not yet clear / combative'},{v:'blast_injury',l:'Shotgun / blast mechanism'}],
   stab:             [{v:'penetrating_torso',l:'Torso / junctional wound'},{v:'anticoag',l:'On anticoagulants'},{v:'unstable_vitals',l:'Hemorrhagic shock'},{v:'multiple_stabs',l:'Multiple stab wounds'},{v:'combative',l:'Scene safety concern / still active threat'},{v:'pregnant',l:'Pregnant patient'},{v:'geriatric',l:'Geriatric patient'}],
-  fall_trauma:      [{v:'anticoag',l:'On anticoagulants (bleed risk ×10)'},{v:'geriatric',l:'Geriatric — osteoporosis / hip fracture'},{v:'post_trauma_ms',l:'Head strike / altered mental status'},{v:'spinal_precautions',l:'Height >10 ft or LOC at scene'},{v:'pediatric',l:'Pediatric — non-accidental trauma?'},{v:'unstable_vitals',l:'Internal hemorrhage suspected'}],
-  burn:             [{v:'fire_rescue',l:'Structure fire / CO co-exposure'},{v:'pediatric',l:'Pediatric patient'},{v:'geriatric',l:'Geriatric patient'},{v:'unstable_vitals',l:'Airway compromise / >20% BSA'},{v:'blast_injury',l:'Blast / explosion mechanism'},{v:'anticoag',l:'On anticoagulants'}],
+  fall_trauma:      [{v:'anticoag',l:'On anticoagulants (bleed risk x10)'},{v:'geriatric',l:'Geriatric — osteoporosis / hip fracture'},{v:'post_trauma_ms',l:'Head strike / altered mental status'},{v:'spinal_precautions',l:'Height 10+ ft fall or LOC at scene'},{v:'pediatric',l:'Pediatric — non-accidental trauma?'},{v:'unstable_vitals',l:'Internal hemorrhage suspected'}],
+  burn:             [{v:'fire_rescue',l:'Structure fire / CO co-exposure'},{v:'pediatric',l:'Pediatric patient'},{v:'geriatric',l:'Geriatric patient'},{v:'unstable_vitals',l:'Airway compromise / BSA 20%+'},{v:'blast_injury',l:'Blast / explosion mechanism'},{v:'anticoag',l:'On anticoagulants'}],
   amputation:       [{v:'high_moi',l:'High mechanism — machinery / MVC'},{v:'anticoag',l:'On anticoagulants'},{v:'unstable_vitals',l:'Hemorrhagic shock'},{v:'diabetic',l:'Known diabetic'},{v:'geriatric',l:'Geriatric patient'},{v:'pediatric',l:'Pediatric patient'}],
   /* Toxicological */
   opioid_od:        [{v:'fentanyl_involved',l:'Fentanyl / carfentanil suspected — high-dose Narcan'},{v:'multi_substance',l:'Multi-substance / polypharmacy'},{v:'pediatric',l:'Pediatric patient'},{v:'unstable_vitals',l:'Apneic / pulseless on arrival'},{v:'combative',l:'Agitated post-Narcan (withdrawal)'},{v:'geriatric',l:'Geriatric patient'},{v:'pregnant',l:'Pregnant patient'}],
@@ -3378,8 +3388,8 @@ var EMS_COMPLAINT_MODS = {
   hypoglycemia:     [{v:'diabetic',l:'Known diabetic — type 1 / insulin-dependent'},{v:'geriatric',l:'Geriatric — atypical signs'},{v:'pediatric',l:'Pediatric patient'},{v:'combative',l:'Combative — neuro-glycopenic'},{v:'post_trauma_ms',l:'Hypoglycemia + trauma mechanism'},{v:'multi_substance',l:'Alcohol + hypoglycemia (thiamine first)'},{v:'unstable_vitals',l:'Unconscious — cannot take PO glucose'}],
   allergic:         [{v:'unstable_vitals',l:'Anaphylaxis — hemodynamic compromise'},{v:'pediatric',l:'Pediatric patient'},{v:'pregnant',l:'Pregnant patient'},{v:'known_cardiac',l:'Cardiac history — Epi relative caution'},{v:'combative',l:'Severe airway compromise / agitated'},{v:'morbid_obesity',l:'Morbid obesity — dose adjustment'},{v:'anticoag',l:'On anticoagulants'}],
   abdo_pain:        [{v:'pregnant',l:'Pregnant — ectopic / abruption?'},{v:'geriatric',l:'Geriatric — atypical AAA presentation'},{v:'anticoag',l:'On anticoagulants — GI bleed risk'},{v:'unstable_vitals',l:'Hemorrhagic shock / rigid abdomen'},{v:'diabetic',l:'Known diabetic — DKA?'},{v:'penetrating_torso',l:'Penetrating trauma component'},{v:'post_trauma_ms',l:'Blunt abdominal trauma'}],
-  obstetric:        [{v:'crowning',l:'Crowning — deliver on scene, do NOT transport'},{v:'pph',l:'Postpartum hemorrhage'},{v:'preeclampsia',l:'Preeclampsia / eclampsia signs'},{v:'unstable_vitals',l:'Maternal shock / hypotension'},{v:'pediatric',l:'Infant requires resuscitation (Apgar <5)'},{v:'high_moi',l:'Cord prolapse — knee-chest, emergency transport'}],
-  hypothermia:      [{v:'hypothermic_arrest',l:'Cardiac arrest — "not dead until warm"'},{v:'geriatric',l:'Geriatric patient'},{v:'pediatric',l:'Pediatric patient'},{v:'unstable_vitals',l:'Severe hypothermia <86°F'},{v:'multi_substance',l:'Substance use suspected'},{v:'post_trauma_ms',l:'Trauma + cold exposure'}],
+  obstetric:        [{v:'crowning',l:'Crowning — deliver on scene, do NOT transport'},{v:'pph',l:'Postpartum hemorrhage'},{v:'preeclampsia',l:'Preeclampsia / eclampsia signs'},{v:'unstable_vitals',l:'Maternal shock / hypotension'},{v:'pediatric',l:'Infant requires resuscitation (Apgar 5 or below)'},{v:'high_moi',l:'Cord prolapse — knee-chest, emergency transport'}],
+  hypothermia:      [{v:'hypothermic_arrest',l:'Cardiac arrest — "not dead until warm"'},{v:'geriatric',l:'Geriatric patient'},{v:'pediatric',l:'Pediatric patient'},{v:'unstable_vitals',l:'Severe hypothermia — below 86 F'},{v:'multi_substance',l:'Substance use suspected'},{v:'post_trauma_ms',l:'Trauma + cold exposure'}],
   heat_stroke:      [{v:'exertional_heat',l:'Exertional — young / athletic patient'},{v:'geriatric',l:'Classic — elderly / no AC'},{v:'unstable_vitals',l:'Seizure / altered MS present'},{v:'diabetic',l:'Known diabetic'},{v:'known_cardiac',l:'Known cardiac history'},{v:'pediatric',l:'Pediatric patient'}],
   psych:            [{v:'combative',l:'Combative / actively violent — LEO first'},{v:'post_trauma_ms',l:'Possible organic cause (head trauma?)'},{v:'diabetic',l:'Rule out hypoglycemia first'},{v:'fentanyl_involved',l:'Substance intoxication suspected'},{v:'geriatric',l:'Geriatric — delirium vs psych?'},{v:'pediatric',l:'Pediatric patient'},{v:'unstable_vitals',l:'Medically unstable while behavioral'}]
 };
@@ -3470,7 +3480,7 @@ function runEmsTree() {
   }
 
   var stepsHTML = steps.map(function(s,i){
-    return '<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:12.5px;">'
+    return '<div class="dtree-step" style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:12.5px;">'
       +'<span style="min-width:20px;font-weight:700;color:'+t.color+';">'+(i+1)+'.</span><span>'+s+'</span></div>';
   }).join('');
 
@@ -3493,7 +3503,7 @@ function runEmsTree() {
   var pins     = loadPins('ems');
 
   res.style.display='block'; ph.style.display='none';
-  res.innerHTML = '<div style="border:2px solid '+t.color+';border-radius:12px;padding:16px;background:'+t.bg+'"'
+  res.innerHTML = '<div class="dtree-card" style="border:2px solid '+t.color+';border-radius:12px;padding:16px;background:'+t.bg+'"'
     +' data-pin-id="'+pinId+'" data-pin-type="dtree"'
     +' data-pin-complaint="'+complaint+'" data-pin-mod="'+(mod||'')+'"'
     +' data-pin-title="'+escHtml(pinTitle)+'" data-pin-body="'+escHtml(pinBody.substring(0,140))+'">'
@@ -3506,12 +3516,12 @@ function runEmsTree() {
     +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">'+flagsHTML+' '+modeBadge+'</div>'
     +blsIntercept
     +modNote
-    +'<p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:0 0 6px;">Protocol steps</p>'
+    +'<p class="dtree-section-label" style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:0 0 6px;">Protocol steps</p>'
     +stepsHTML
-    +'<p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:12px 0 5px;">Medications</p><div>'+medsHTML+'</div>'
-    +'<p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:10px 0 5px;">Equipment</p><div>'+equHTML+'</div>'
-    +'<p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:10px 0 5px;">Radio report</p>'
-    +'<div style="background:rgba(0,0,0,.04);border-left:3px solid '+t.color+';border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;font-style:italic;">'+radioTxt+'</div>'
+    +'<p class="dtree-section-label" style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:12px 0 5px;">Medications</p><div>'+medsHTML+'</div>'
+    +'<p class="dtree-section-label" style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:10px 0 5px;">Equipment</p><div>'+equHTML+'</div>'
+    +'<p class="dtree-section-label" style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:10px 0 5px;">Radio report</p>'
+    +'<div class="dtree-radio" style="background:rgba(0,0,0,.04);border-left:3px solid '+t.color+';border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;font-style:italic;">'+radioTxt+'</div>'
     +'</div>';
 }
 
@@ -3561,23 +3571,23 @@ function runLeoTree() {
   var t = LEO_TREE[behavior];
   if (!t) return;
   var modNote = ctx && LEO_MOD_NOTES[ctx] ? '<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 13px;font-size:12px;color:#991B1B;margin-bottom:12px;">'+LEO_MOD_NOTES[ctx]+'</div>' : '';
-  var stepsHTML = t.steps.map(function(s,i){return '<div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:12.5px;"><span style="min-width:20px;font-weight:700;color:'+t.color+';">'+(i+1)+'.</span><span>'+s+'</span></div>';}).join('');
+  var stepsHTML = t.steps.map(function(s,i){return '<div class="dtree-step" style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:12.5px;"><span style="min-width:20px;font-weight:700;color:'+t.color+';">'+(i+1)+'.</span><span>'+s+'</span></div>';}).join('');
   var chargeHTML = t.charges.length ? t.charges.map(function(cid){var c=CHARGES.find(function(x){return x.id===cid;});if(!c)return '';return '<span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;margin:2px;cursor:pointer;" onclick="switchMode(\'leo\');leoTab(\'penalty\',document.querySelector(\'#leo-nav .nav-btn\'));setTimeout(function(){addCharge(\''+c.id+'\');},50)">+ '+c.name+'</span>';}).join('') : '<span style="color:#94A3B8;font-size:12px;">No standard charges — use discretion</span>';
   var flagsHTML = t.flags.map(function(f){return '<span style="background:'+t.bg+';color:'+t.color+';font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;border:1px solid '+t.color+';">'+f+'</span>';}).join(' ');
   res.style.display='block'; ph.style.display='none';
-  res.innerHTML='<div style="border:2px solid '+t.color+';border-radius:12px;padding:16px;background:'+t.bg+'">'
+  res.innerHTML='<div class="dtree-card" style="border:2px solid '+t.color+';border-radius:12px;padding:16px;background:'+t.bg+'">'
     +'<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">'
     +'<span style="font-size:16px;font-weight:700;color:'+t.color+';">'+t.title+'</span>'
     +'<span style="font-size:11px;font-weight:700;background:'+t.color+';color:#fff;padding:3px 10px;border-radius:20px;">'+t.uof+'</span>'
     +'</div>'
     +'<div style="margin-bottom:8px;">'+flagsHTML+'</div>'
     +modNote
-    +'<p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:0 0 6px;">Response steps</p>'
+    +'<p class="dtree-section-label" style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:0 0 6px;">Response steps</p>'
     +stepsHTML
-    +'<p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:12px 0 5px;">Typical charges (tap to add to calculator)</p>'
+    +'<p class="dtree-section-label" style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:12px 0 5px;">Typical charges (tap to add to calculator)</p>'
     +'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">'+chargeHTML+'</div>'
-    +'<p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:10px 0 5px;">Radio call</p>'
-    +'<div style="background:rgba(0,0,0,.04);border-left:3px solid '+t.color+';border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;font-style:italic;">'+t.radio+'</div>'
+    +'<p class="dtree-section-label" style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:10px 0 5px;">Radio call</p>'
+    +'<div class="dtree-radio" style="background:rgba(0,0,0,.04);border-left:3px solid '+t.color+';border-radius:0 6px 6px 0;padding:8px 12px;font-size:12px;font-style:italic;">'+t.radio+'</div>'
     +'</div>';
 }
 
@@ -4334,9 +4344,20 @@ function rwCopy(elId, btn) {
 /* ═══════════════════════════════════════════════
    VERSION TRACKING
 ═══════════════════════════════════════════════ */
-var LARPAID_VERSION = '1.1.0';
+var LARPAID_VERSION = '1.3.0';
 
 var CHANGELOG = [
+  {
+    ver:   '1.3.0',
+    date:  'June 2026',
+    tags:  ['fix'],
+    notes: [
+      { type:'fix', text:'Dark mode: decision tree protocol cards (EMS + LEO) now fully readable — step rows, section labels, and radio call boxes no longer render with hardcoded light backgrounds in dark mode.' },
+      { type:'fix', text:'Decision tree modifiers: all secondary modifier dropdown labels containing raw < and > characters have been reworded to avoid HTML rendering issues across all complaint categories.' },
+      { type:'fix', text:'Fall — high mechanism: "Height >10 ft or LOC at scene" spinal precautions modifier label reworded for clarity and consistency.' },
+      { type:'fix', text:'Update check: GitHub fetch URL corrected to point to the actual LARP-Aid repository (b6verly/LARP-Aid) instead of the old placeholder URL.' },
+    ]
+  },
   {
     ver:   '1.1.0',
     date:  'June 2026',
@@ -4451,7 +4472,7 @@ if (document.readyState !== 'loading') {
 /* ═══════════════════════════════════════════════
    UPDATE CHECK SYSTEM
 ═══════════════════════════════════════════════ */
-var UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/B6verly/larpaid-releases/main/version.json';
+var UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/b6verly/LARP-Aid/main/version.json';
 
 /* Compare semver strings — returns true if remote > local */
 function updIsNewer(remote, local) {
@@ -4516,7 +4537,7 @@ setTimeout(checkForUpdates, 1500);
     <span class="footer-brand">LARP-AID</span>
     <button class="ver-badge" onclick="openVerModal()" title="View changelog" style="margin:0 4px;">
       <span class="ver-dot"></span>
-      <span class="ver-txt">v1.1.0</span>
+      <span class="ver-txt">v1.3.0</span>
     </button>
     <span class="footer-sep">&middot;</span>
     <span class="footer-credit">Built by <strong>B6verly</strong></span>
