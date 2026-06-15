@@ -1,6 +1,6 @@
 {
-  "version": "1.5.0",
+  "version": "1.6.0",
   "date": "June 2026",
-  "notes": ["Bug fixes", "New scene protocols added", "Decision Tree improvements", "Report Writer auto-fill"],
+  "notes": ["Timers tab added", "MCI alert mode", "Pop-out notepad", "Triage calculator improvements", "LEO functionality overhaul", "Bug fixes & pin fixes"],
   "download_url": "https://raw.githubusercontent.com/b6verly/LARP-Aid/refs/heads/main/releases/larp_aid.html"
 }
