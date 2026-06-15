@@ -4818,6 +4818,7 @@ if (document.readyState !== 'loading') {
    UPDATE CHECK SYSTEM
 ═══════════════════════════════════════════════ */
 var UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/b6verly/LARP-Aid/main/version.json';
+var UPDATE_DOWNLOAD_URL = 'https://raw.githubusercontent.com/b6verly/LARP-Aid/refs/heads/main/releases/larp_aid.html';
 
 /* Compare semver strings — returns true if remote > local */
 function updIsNewer(remote, local) {
@@ -4846,7 +4847,7 @@ function updShowBanner(remoteVer, notes, downloadUrl) {
   }
 
   var link = document.getElementById('upd-download-link');
-  link.href = downloadUrl || 'https://github.com/b6verly/LARP-Aid/releases/latest';
+  link.href = downloadUrl || UPDATE_DOWNLOAD_URL;
   document.getElementById('update-banner').classList.add('vis');
 }
 
