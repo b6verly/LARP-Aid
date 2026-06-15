@@ -1,1 +1,1 @@
-Invite only at this time. These are update files, not installation files. Planning to release a downloadable version soon.
+Published! Version 1.5.0 marks the first fully public installation files for Larp-Aid. Have fun!
