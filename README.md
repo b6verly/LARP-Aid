@@ -1,1 +1,1 @@
-Published! Version 1.5.0 marks the first fully public installation files for Larp-Aid. Have fun!
+This marks the second update since total publication. Version 1.6.0 out of many more to come!
