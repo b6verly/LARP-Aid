@@ -4,42 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LARP-AID — Field Guide</title>
-<script>
-/* ── ELECTRON GATE ──────────────────────────────────────────────────────────
-   Blocks the app from running in any regular browser.
-   Electron always injects "Electron" into navigator.userAgent.
-   A standard browser (Chrome, Firefox, Edge, Safari) never will.
-   ─────────────────────────────────────────────────────────────────────────── */
-(function() {
-  if (!/Electron/.test(navigator.userAgent)) {
-    document.addEventListener('DOMContentLoaded', function() {
-      document.body.innerHTML = '';
-      document.body.style.cssText = [
-        'margin:0', 'padding:0', 'height:100vh', 'width:100vw',
-        'display:flex', 'align-items:center', 'justify-content:center',
-        'background:#0f172a', 'font-family:system-ui,sans-serif'
-      ].join(';');
-      var box = document.createElement('div');
-      box.style.cssText = [
-        'text-align:center', 'color:#e2e8f0', 'max-width:420px', 'padding:2rem'
-      ].join(';');
-      box.innerHTML = [
-        '<div style="font-size:3rem;margin-bottom:1rem;">🔒</div>',
-        '<h1 style="font-size:1.4rem;font-weight:700;margin:0 0 0.75rem;color:#f8fafc;">',
-          'LARP-AID — Restricted',
-        '</h1>',
-        '<p style="font-size:0.95rem;color:#94a3b8;line-height:1.6;margin:0;">',
-          'This application must be opened through the LARP-AID desktop app.',
-          '<br><br>If you believe you should have access, contact your server admin.',
-        '</p>'
-      ].join('');
-      document.body.appendChild(box);
-    });
-    /* Also stop any scripts from running by throwing before DOMContentLoaded */
-    throw new Error('LARP-AID: not running in Electron — blocked.');
-  }
-})();
-</script>
 <style>
 /* ══════════════════════════════════════════
    CSS CUSTOM PROPERTIES — light + dark
@@ -738,6 +702,22 @@ body { margin: 0; }
 [data-theme="dark"] .search-results-header { background: var(--color-bg-secondary); border-color: var(--color-border); }
 [data-theme="dark"] .pin-item        { background: var(--color-bg-raised); border-color: var(--color-border); }
 
+/* ── Med card hover tooltip ── */
+.med-card-wrap { position: relative; }
+.med-tooltip {
+  display: none; position: absolute; left: 0; right: 0; top: calc(100% + 6px);
+  z-index: 500; background: var(--color-bg-raised);
+  border: 1.5px solid var(--color-border-2); border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 12px 14px; font-size: 12px;
+  line-height: 1.6; color: var(--color-text);
+}
+.med-card-wrap:hover .med-tooltip { display: block; }
+.med-tooltip-row { display: flex; gap: 6px; margin-bottom: 4px; }
+.med-tooltip-row:last-child { margin-bottom: 0; }
+.med-tooltip-label { font-weight: 700; color: var(--color-text-2); min-width: 86px; flex-shrink: 0; }
+.med-tooltip-val { color: var(--color-text); }
+[data-theme="dark"] .med-tooltip { background: var(--color-bg-raised); border-color: var(--color-border-2); }
+
 /* ── 10-codes — new card grid layout ── */
 .codes-grid {
   display: grid;
@@ -895,6 +875,7 @@ body { margin: 0; }
   margin-top: 6px; padding: 8px 11px; border-radius: var(--radius-sm);
   background: #FEF2F2; border: 1px solid #FECACA; font-size: 12px; color: #991B1B; font-weight: 600; display: none;
 }
+.pen-arrest-flag.show { display: block; }
 /* ══════════════════════════════════════════
    ALS / BLS VISIBILITY SYSTEM
    data-als="ALS" → hide .bls-only
@@ -1222,6 +1203,7 @@ body { margin: 0; }
   <button class="nav-btn" onclick="emsTab('acronyms',this)">📖 Acronyms</button>
   <button class="nav-btn" onclick="emsTab('meds',this)">💊 Medications</button>
   <button class="nav-btn" onclick="emsTab('rig',this)">Rig check</button>
+  <button class="nav-btn" onclick="emsTab('timers',this)">⏱️ Timers</button>
   <button class="nav-btn" onclick="emsTab('reports',this)">📝 Report Writer</button>
 </div>
 
@@ -1254,6 +1236,7 @@ body { margin: 0; }
     <button class="spill" onclick="emsScene('pediatric',this)">👶 Pediatric</button>
     <button class="spill" onclick="emsScene('burn',this)">🔥 Burns</button>
     <button class="spill" onclick="emsScene('seizure_sc',this)">⚡ Seizure</button>
+    <button class="spill" onclick="emsScene('psych',this)">🧠 Psych / Behavioral</button>
   </div>
 
   <!-- MVC -->
@@ -1422,6 +1405,10 @@ body { margin: 0; }
   <!-- MCI -->
   <div class="card scene-card" id="ems-sc-mci">
     <h3>Mass casualty incident (MCI)</h3>
+    <div style="margin-bottom:12px;">
+      <button id="mci-toggle-btn" onclick="toggleMCI()" style="width:100%;padding:10px 16px;font-size:13px;font-weight:800;letter-spacing:.04em;border-radius:8px;border:2px solid #DC2626;background:transparent;color:#DC2626;cursor:pointer;font-family:var(--font-sans);transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;">🚨 ACTIVATE MCI</button>
+      <p style="font-size:11px;color:var(--color-text-3);text-align:center;margin:4px 0 0;">Activates alert mode — flashing banner + live triage board</p>
+    </div>
     <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Declare MCI immediately</strong><span><em>"Dispatch, Medic 1 — declaring MCI at [location]. Estimating [X] patients. Requesting [X] additional units, police, fire, and supervisor to establish Incident Command."</em> Do NOT begin treatment until size-up is complete. Your first job is information gathering.</span></div></div>
     <div class="prow"><span class="picon">🏃</span><div class="ptxt"><strong>START triage — tag, don't treat</strong><span>Walk the scene quickly. <strong>Walking?</strong> → Green (tag and move to assembly point). <strong>Not walking:</strong> open airway — breathing? No → Black. Yes → RR &gt;30 or &lt;10 → Red. Radial pulse absent → Red. Won't follow simple commands → Red. Otherwise → Yellow. One tourniquet on arterial bleeds only. Move on.</span></div></div>
     <div class="prow"><span class="picon">📍</span><div class="ptxt"><strong>Sector setup</strong><span>Treatment area: Red sector (immediate) and Yellow sector (delayed) separated. Transport sector for loading. Command post uphill/upwind. Each sector needs a sector leader reporting to Medical Branch Director → Incident Commander. Do NOT freelance — work your sector only.</span></div></div>
@@ -1478,6 +1465,25 @@ body { margin: 0; }
     <div class="prow bls-only"><span class="picon">🩹</span><div class="ptxt"><strong>BLS — supportive care + ALS</strong><span>Protect, position, oxygenate. Oral glucose if BG &lt;60 and conscious. Request ALS intercept for status epilepticus — they have the benzodiazepines. Transport all first-time seizures regardless of recovery.</span></div></div>
     <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Radio report</strong><span><em>"# [Hospital], Medic 1 inbound — [witnessed / unwitnessed] seizure. Duration [X] min. [First time / known epileptic]. Post-ictal now / still seizing. GCS [X]. [Meds given]. ETA [X]."</em></span></div></div>
     <div style="margin-top:10px;"><span class="badge b-amber">Suction</span><span class="badge b-blue">O2 NRB</span><span class="badge b-amber">Glucometer</span><span class="badge b-blue als-only">Midazolam IM</span><span class="badge als-tag als-only">Diazepam IV</span><span class="badge b-green bls-only">ALS intercept</span></div>
+  </div>
+
+  <!-- Psych / Behavioral Emergency scene protocol -->
+  <div class="card scene-card" id="ems-sc-psych">
+    <h3>Psychiatric / behavioral emergency</h3>
+    <div class="prow"><span class="picon">🛡️</span><div class="ptxt"><strong>Scene safety first — always</strong><span>Do NOT approach a potentially violent patient without LEO on scene. Stage until PD clears. Assess for weapons. Announce: <em>"Medic 1 staging — awaiting law enforcement clearance."</em> Even calm-appearing psych patients can escalate unpredictably. Low-stimulation environment: reduce responders present, lower voices, step back.</span></div></div>
+    <div class="prow"><span class="picon">🔍</span><div class="ptxt"><strong>Rule out organic / medical cause FIRST</strong><span>Psychiatric behavior can be caused by: hypoglycemia (check BG immediately), CO poisoning, head trauma, stroke, seizure, hypoxia, substance intoxication, medication effect. These are medical emergencies — don't assume it's purely behavioral. AEIOU TIPS: Alcohol, Epilepsy, Insulin, Overdose, Uremia — Trauma, Infection, Psychiatric, Stroke.</span></div></div>
+    <div class="prow"><span class="picon">💬</span><div class="ptxt"><strong>De-escalation approach</strong><span>Introduce yourself calmly: <em>"Hi, I'm [name] with EMS. I'm here to help, not to hurt you."</em> Non-threatening posture: hands visible, don't crowd, stay at eye level if possible. Speak slowly and clearly — one question at a time. Validate emotions without agreeing with delusions: <em>"That sounds really frightening — I can see you're upset."</em> Give patient some sense of control: <em>"Would you like to sit down?"</em></span></div></div>
+    <div class="prow"><span class="picon">⚠️</span><div class="ptxt"><strong>Recognize escalation warning signs</strong><span>Pacing, clenching fists, raised voice, scanning for exits, sudden silence, moving toward you. If any of these: increase distance, call for LEO, do not turn your back. Tactical retreat is not failure — it is safety.</span></div></div>
+    <div class="prow als-only"><span class="picon">💊</span><div class="ptxt"><strong>ALS — pharmacological intervention</strong><span>Only after LEO has physical control. Excited Delirium (ExDS) — hot, strong, confused, not responding to pain: Midazolam 10mg IM (vastus lateralis, can give through clothing). Agitated but cooperative: Midazolam 2.5–5mg IM or IV. Monitor airway closely post-sedation — respiratory depression risk. 12-lead if cardiac symptoms or history.</span></div></div>
+    <div class="prow bls-only"><span class="picon">🩹</span><div class="ptxt"><strong>BLS — de-escalate, observe, request ALS</strong><span>No chemical restraint in BLS scope. Document behavior objectively. Request ALS intercept if combative, agitated, or medical cause suspected. Ensure LEO is present before approach. Protect yourself — leave the room if unsure.</span></div></div>
+    <div class="prow"><span class="picon">📋</span><div class="ptxt"><strong>Baker Act / WI 51.15 — psychiatric hold</strong><span>Wisconsin 51.15 — Emergency Detention: person may be detained by law enforcement if: danger to self or others due to mental illness, AND is unwilling/unable to accept voluntary treatment. EMS role: document behavior observed, request LEO initiate hold if criteria met, transport to appropriate receiving facility. Always document specific behaviors seen — not just "patient was acting crazy."</span></div></div>
+    <div class="prow"><span class="picon">📝</span><div class="ptxt"><strong>RP — documentation language</strong><span>Objective only. Use: "Patient stated [exact quote]." "Observed patient [specific behavior]." "Patient was pacing, clenching fists, yelling 'get away from me' repeatedly." Avoid: "Patient was crazy / irrational / out of it." Your report may be used for a legal commitment proceeding — be precise.</span></div></div>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Radio report</strong><span><em>"# [Hospital], Medic 1 inbound — behavioral emergency. [Age/sex]. [Cooperative / combative]. Medical cause [ruled out / still evaluating]. BG [X]. GCS [X]. LEO accompanying. ETA [X] — requesting psych eval on arrival."</em></span></div></div>
+    <div style="margin-top:10px;">
+      <span class="badge b-amber">Scene safety / LEO required</span><span class="badge b-blue">Glucometer (rule out BG)</span><span class="badge b-blue">O2 if SpO2 &lt;95%</span><span class="badge b-purple">De-escalation</span>
+      <span class="badge als-tag als-only">Midazolam 10mg IM (ExDS)</span><span class="badge b-blue als-only">12-lead ECG</span>
+      <span class="badge b-green bls-only">ALS intercept if combative</span>
+    </div>
   </div>
 
 </div>
@@ -1580,6 +1586,7 @@ body { margin: 0; }
   </div>
   <button class="assess-btn" onclick="runAssess()">🩺 Assess patient</button>
   <div id="assess-result"></div>
+  <div id="assess-specific" style="margin-top:10px;"></div>
 </div>
 
 <!-- Radio -->
@@ -1653,23 +1660,38 @@ body { margin: 0; }
   <hr class="divider">
   <p class="sec-label">Hospital notification — radio report structure</p>
   <div class="card" style="margin-bottom:14px;">
-    <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 10px;">Contact hospital 5–10 minutes out. Use this structure every time — it lets the ER prepare the right room and team.</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0;">Contact hospital 5–10 minutes out. Use this structure every time — it lets the ER prepare the right room and team.</p>
+      <button onclick="sbarCopyAll(this)" style="font-size:11.5px;font-weight:600;padding:4px 13px;border-radius:999px;border:1.5px solid var(--color-border-2);background:transparent;color:var(--color-text-2);cursor:pointer;font-family:var(--font-sans);transition:all .15s;" onmouseover="this.style.borderColor='var(--c-blue)';this.style.color='var(--c-blue)'" onmouseout="this.style.borderColor='var(--color-border-2)';this.style.color='var(--color-text-2)'">📋 Copy full SBAR</button>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0 0 5px;">SBAR — Situation</p>
-        <p style="font-size:12px;margin:0;line-height:1.6;"><em>"[Hospital], Medic 1 inbound with a [age/sex] patient — chief complaint: [complaint]. Mechanism: [MOI]."</em></p>
+      <div id="sbar-situation" style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0;">SBAR — Situation</p>
+          <button onclick="sbarCopyPanel('sbar-situation',this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button>
+        </div>
+        <p class="sbar-text" style="font-size:12px;margin:0;line-height:1.6;"><em>"[Hospital], Medic 1 inbound with a [age/sex] patient — chief complaint: [complaint]. Mechanism: [MOI]."</em></p>
       </div>
-      <div style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0 0 5px;">SBAR — Background</p>
-        <p style="font-size:12px;margin:0;line-height:1.6;"><em>"PMH: [relevant history]. Meds: [list or none known]. Allergies: [list or NKDA]."</em></p>
+      <div id="sbar-background" style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0;">SBAR — Background</p>
+          <button onclick="sbarCopyPanel('sbar-background',this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button>
+        </div>
+        <p class="sbar-text" style="font-size:12px;margin:0;line-height:1.6;"><em>"PMH: [relevant history]. Meds: [list or none known]. Allergies: [list or NKDA]."</em></p>
       </div>
-      <div style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0 0 5px;">SBAR — Assessment</p>
-        <p style="font-size:12px;margin:0;line-height:1.6;"><em>"Vitals: BP [X/X], HR [X], RR [X], SpO2 [X]%, GCS [X]. Interventions: [O2, IV, medications, procedures]."</em></p>
+      <div id="sbar-assessment" style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0;">SBAR — Assessment</p>
+          <button onclick="sbarCopyPanel('sbar-assessment',this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button>
+        </div>
+        <p class="sbar-text" style="font-size:12px;margin:0;line-height:1.6;"><em>"Vitals: BP [X/X], HR [X], RR [X], SpO2 [X]%, GCS [X]. Interventions: [O2, IV, medications, procedures]."</em></p>
       </div>
-      <div style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0 0 5px;">SBAR — Recommendation</p>
-        <p style="font-size:12px;margin:0;line-height:1.6;"><em>"Requesting [trauma team / cath lab / stroke team / psych eval]. ETA [X] minutes."</em></p>
+      <div id="sbar-recommendation" style="background:var(--color-bg-secondary);border-radius:8px;padding:10px 12px;border-left:3px solid var(--c-blue);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0;">SBAR — Recommendation</p>
+          <button onclick="sbarCopyPanel('sbar-recommendation',this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button>
+        </div>
+        <p class="sbar-text" style="font-size:12px;margin:0;line-height:1.6;"><em>"Requesting [trauma team / cath lab / stroke team / psych eval]. ETA [X] minutes."</em></p>
       </div>
     </div>
   </div>
@@ -1678,40 +1700,40 @@ body { margin: 0; }
   <p class="sec-label">Situation-specific radio scripts</p>
   <div class="grid2">
     <div class="card">
-      <h3>Cardiac arrest</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;"><h3>Cardiac arrest</h3><button onclick="radioCopyCard(this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button></div>
       <ul>
         <li><em>"[Hospital], Medic 1 — inbound cardiac arrest, [age/sex]. CPR [X] minutes. Rhythm: [VF/PEA/asystole]. Epi [X]mg given. [Shocked X times]. GCS 3. ETA [X]."</em></li>
         <li>Announce ROSC: <em>"ROSC achieved, BP [X/X], HR [X], patient [conscious/unconscious]."</em></li>
       </ul>
     </div>
     <div class="card">
-      <h3>Trauma (GSW/MVC/stab)</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;"><h3>Trauma (GSW/MVC/stab)</h3><button onclick="radioCopyCard(this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button></div>
       <ul>
         <li><em>"[Hospital], Medic 1 — trauma activation. [Age/sex], [mechanism]. GCS [X]. BP [X/X], HR [X]. Injuries: [list]. Tourniquet [yes/no]. IV x2. ETA [X]."</em></li>
         <li>Critical: add <em>"requesting trauma team at bedside."</em></li>
       </ul>
     </div>
     <div class="card">
-      <h3>Stroke alert</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;"><h3>Stroke alert</h3><button onclick="radioCopyCard(this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button></div>
       <ul>
         <li><em>"[Hospital], Medic 1 — STROKE ALERT. [Age/sex], last known well [time]. Positive: [facial droop/arm drift/speech]. BP [X/X], GCS [X], glucose [X]. ETA [X]."</em></li>
       </ul>
     </div>
     <div class="card">
-      <h3>OB / field delivery</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;"><h3>OB / field delivery</h3><button onclick="radioCopyCard(this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button></div>
       <ul>
         <li><em>"[Hospital], Medic 1 — field delivery / imminent. [Infant delivered / crowning]. Infant [crying/not crying, color]. Mother stable, BP [X/X]. ETA [X]."</em></li>
         <li>Request OB team and NICU notification if needed.</li>
       </ul>
     </div>
     <div class="card">
-      <h3>Overdose</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;"><h3>Overdose</h3><button onclick="radioCopyCard(this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button></div>
       <ul>
         <li><em>"[Hospital], Medic 1 — OD, [age/sex], [substance if known]. Narcan [X]mg — [response]. GCS [X], RR [X], SpO2 [X]%. ETA [X]."</em></li>
       </ul>
     </div>
     <div class="card">
-      <h3>Anaphylaxis</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;"><h3>Anaphylaxis</h3><button onclick="radioCopyCard(this)" style="font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Copy</button></div>
       <ul>
         <li><em>"[Hospital], Medic 1 — anaphylaxis. Epi [X]mg IM [time]. Airway [clear/compromised]. BP [X/X], HR [X], SpO2 [X]%. Responding [yes/no]. ETA [X]."</em></li>
       </ul>
@@ -1906,7 +1928,7 @@ body { margin: 0; }
 
   <p class="sec-label" style="margin-top:0;">Cardiac &amp; circulatory</p>
   <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
-    <div class="card" style="padding:11px 14px;">
+    <div class="med-card-wrap"><div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Epinephrine (Adrenaline)</strong>
         <span class="badge b-red">Cardiac arrest</span><span class="badge b-red">Anaphylaxis</span>
@@ -1916,8 +1938,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">Anaphylaxis:</span> 0.3mg IM (1:1000) anterolateral thigh</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> Hypertensive emergency (relative)</div>
       </div>
-    </div>
-    <div class="card als-only" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Cardiac arrest: 1mg IV/IO every 3–5 min</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Anaphylaxis: 0.3mg IM (1:1000) anterolateral thigh</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Pediatric: 0.01mg/kg IV/IO (max 1mg)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Push-dose (ALS): 10–20mcg IV bolus for hypotension</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Cardiac arrest (VF / pVT / PEA / asystole)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Anaphylaxis / severe allergic reaction</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Severe bronchospasm refractory to albuterol</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">No true absolute contraindications in cardiac arrest or anaphylaxis</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Relative: hypertensive emergency, known coronary artery disease (anaphylaxis dose still warranted)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">1mg dose = 10mL of 1:10,000 concentration IV</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">0.3mg dose = 0.3mL of 1:1,000 concentration IM</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Never give 1:1,000 IV — causes fatal arrhythmia</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Repeat anaphylaxis dose q5–15 min if no response</span></div></div></div>
+    <div class="med-card-wrap"><div class="card als-only" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Amiodarone</strong> <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;">ALS</span>
         <span class="badge b-red">VF / pVT</span>
@@ -1927,8 +1949,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> After 3rd defibrillation in refractory VF/pVT</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> Bradycardia, 2nd/3rd degree heart block</div>
       </div>
-    </div>
-    <div class="card" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">VF/pVT: 300mg IV/IO bolus; repeat 150mg once</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Stable VT (ALS/orders): 150mg IV over 10 min</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Refractory VF or pulseless VT (after 3rd defibrillation)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Stable ventricular tachycardia with pulse</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Bradycardia</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">2nd or 3rd degree heart block without pacemaker</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Cardiogenic shock</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Give AFTER 3 shocks in refractory VF — do not delay defibrillation</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Can cause hypotension if given too fast in a pulse rhythm</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Shelf life-sensitive — check expiry</span></div></div></div>
+    <div class="med-card-wrap"><div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Aspirin</strong>
         <span class="badge b-amber">Chest pain / ACS</span>
@@ -1938,8 +1960,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Any suspected ACS / STEMI without allergy</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> Aspirin allergy, active GI bleed, stroke (unknown type)</div>
       </div>
-    </div>
-    <div class="card als-only" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">324mg PO (chewed, not swallowed) — one dose only</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Suspected ACS / STEMI / NSTEMI</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Ischemic chest pain of cardiac origin</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Known aspirin allergy</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Active GI bleed</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Unknown stroke type — do NOT give if hemorrhagic stroke possible</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Pediatric patients (Reye syndrome risk)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Chewing increases absorption speed vs swallowing whole</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Do not give for stroke — hemorrhagic stroke + aspirin = catastrophic bleed</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">One-time prehospital dose; hospital continues with maintenance</span></div></div></div>
+    <div class="med-card-wrap"><div class="card als-only" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Nitroglycerin</strong> <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;">ALS</span>
         <span class="badge b-amber">Chest pain / CHF</span>
@@ -1949,8 +1971,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Chest pain with SBP &gt;90, non-inferior STEMI</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> SBP &lt;90, inferior STEMI (RV involvement), ED meds (Viagra/Cialis) within 24–48h</div>
       </div>
-    </div>
-    <div class="card" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">0.4mg SL (tablet or spray) — repeat q5 min x3</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Paste: 1 inch topical for chest pain / acute coronary syndrome</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Chest pain — suspected ACS or angina</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Acute pulmonary edema (reduces preload)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Hypertensive emergency (ALS/orders)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">SBP < 100 mmHg — will crash BP further</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Inferior MI (may suggest RV involvement — get right-sided leads first)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Recent PDE-5 inhibitor use (Viagra/Cialis — within 24–48 hrs)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Severe bradycardia or tachycardia</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Keep under tongue until dissolved — do not swallow</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Patient may feel flushing, headache, or dizziness — normal</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Check BP before and after each dose</span></div></div></div>
+    <div class="med-card-wrap"><div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Normal Saline (NS) / Lactated Ringer's (LR)</strong>
         <span class="badge b-blue">IV Fluid</span>
@@ -1960,12 +1982,12 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Hypotension, dehydration, fluid replacement</div>
         <div><span style="font-weight:700;color:#64748B;">Note:</span> Permissive hypotension for penetrating trauma (SBP 80–90 target)</div>
       </div>
-    </div>
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Hemorrhagic shock: 250mL NS bolus, reassess (permissive hypotension target SBP 80–90 penetrating)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Anaphylaxis: 1–2L NS bolus</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Burns (Parkland): 4mL × kg × %BSA total; half in first 8h from injury</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">TKO: to keep-vein-open when no other indication</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Volume replacement — hemorrhage, dehydration, anaphylaxis, burns</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Medication delivery / IV line maintenance</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">DKA hydration (NS first, then LR)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">CHF / pulmonary edema — aggressive fluids cause lung flooding; limit volume</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Hypernatremia (NS worsens elevated sodium)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Permissive hypotension in penetrating trauma — over-resuscitation worsens coagulopathy</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">LR preferred for large-volume resuscitation (less hyperchloremic acidosis than NS)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Never use D5W for volume replacement — no electrolytes, dilutes sodium</span></div></div></div>
   </div>
 
   <p class="sec-label">Respiratory</p>
   <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
-    <div class="card" style="padding:11px 14px;">
+    <div class="med-card-wrap"><div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Albuterol (Salbutamol)</strong>
         <span class="badge b-blue">Bronchospasm</span><span class="badge b-blue">Asthma</span>
@@ -1975,7 +1997,7 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Asthma, COPD exacerbation, anaphylaxis with wheeze</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> Tachycardia &gt;150 (use caution, not absolute)</div>
       </div>
-    </div>
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">SVN nebulizer: 2.5mg in 3mL NS over 5–10 min</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">MDI (patient's own): 2 puffs — assist administration</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Bronchospasm — asthma, COPD exacerbation</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Reactive airway disease</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Anaphylaxis with bronchospasm (adjunct to Epi)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Tachycardia >150 (relative — consider risk vs benefit)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Known hypersensitivity</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Albuterol treats bronchospasm only — not upper airway obstruction</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">May cause tachycardia and tremor — expected side effects</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">If no response after 3 nebs → escalate, this patient needs ALS</span></div></div></div>
     <div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Oxygen (O2)</strong>
@@ -1991,7 +2013,7 @@ body { margin: 0; }
 
   <p class="sec-label">Neurological &amp; pain</p>
   <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
-    <div class="card" style="padding:11px 14px;">
+    <div class="med-card-wrap"><div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Naloxone (Narcan)</strong>
         <span class="badge b-purple">Opioid reversal</span>
@@ -2001,8 +2023,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">IV/IO:</span> 0.4mg — titrate to respirations (not full reversal)</div>
         <div><span style="font-weight:700;color:#64748B;">Note:</span> Narcan wears off before many opioids — re-narcotization risk. Transport all OD patients.</div>
       </div>
-    </div>
-    <div class="card als-only" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">IN: 2mg (1mg per nostril) — repeat q2–3 min up to 10mg</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">IV/IO: 0.4mg — titrate, not full reversal</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Fentanyl suspected: 4mg IN (2mg per nostril simultaneously)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Pediatric: 0.1mg/kg IN or IV (max 2mg)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Opioid overdose — respiratory depression or arrest</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Opioid-induced altered mental status</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">No absolute contraindications when opioid overdose suspected</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Use cautiously if opioid-dependent — precipitates acute withdrawal</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Pre-oxygenate with BVM BEFORE giving Narcan if apneic</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Narcan half-life is shorter than most opioids — re-narcotization risk</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Titrate IV dose to respirations only — full reversal causes agitated withdrawal</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Transport ALL OD patients even if they wake up</span></div></div></div>
+    <div class="med-card-wrap"><div class="card als-only" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Midazolam (Versed)</strong> <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;">ALS</span>
         <span class="badge b-purple">Seizures</span><span class="badge b-purple">Sedation</span>
@@ -2012,8 +2034,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">Sedation:</span> 2.5–5mg IM (combative/ExDS with LEO restraint)</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> Monitor airway — respiratory depression risk</div>
       </div>
-    </div>
-    <div class="card als-only" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Status epilepticus: 10mg IM or 5mg IV/IO</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Sedation (ExDS, combative): 2.5–10mg IM after LEO restraint</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Pediatric seizure: 0.1–0.2mg/kg IM (max 10mg)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Status epilepticus (>5 min seizure)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Agitated / combative patient requiring sedation (with LEO)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Pre-intubation sedation (RSI — ALS/medical direction)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Respiratory depression / airway compromise (relative — have BVM ready)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Hypotension (causes further BP drop)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">No benzodiazepine reversal agent readily available? Use with caution</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">IM preferred for seizures — faster than starting IV on a seizing patient</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Monitor airway closely — respiratory depression risk is real</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Flumazenil reverses benzo effect but rarely carried prehospital</span></div></div></div>
+    <div class="med-card-wrap"><div class="card als-only" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Fentanyl</strong> <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;">ALS</span>
         <span class="badge b-purple">Pain management</span>
@@ -2023,8 +2045,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Moderate-severe pain, fractures, burns, trauma</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> Hypotension, respiratory depression, head injury (relative)</div>
       </div>
-    </div>
-    <div class="card als-only" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">IV: 1–2 mcg/kg slow push over 2 min</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">IN: 2–4 mcg/kg via atomizer</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Repeat: 0.5–1 mcg/kg q5–10 min as needed</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Pediatric: 1–2 mcg/kg IV or 2 mcg/kg IN</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Moderate to severe pain — fractures, burns, trauma</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Pain management during procedures</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Crush injuries, amputations</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Hypotension (SBP < 90) — vasodilatory effect worsens</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Severe respiratory depression / apneic patient</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Head injury with GCS concern (relative — may mask neuro exam)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Unknown allergy to opioids</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Onset IV: 1–2 min; IN: 5–10 min</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Much shorter acting than morphine — easier to titrate</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Have Narcan drawn and ready before giving</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Document time, dose, route, and pain scale before/after</span></div></div></div>
+    <div class="med-card-wrap"><div class="card als-only" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Dextrose 50% (D50)</strong> <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;">ALS</span>
         <span class="badge b-amber">Hypoglycemia</span>
@@ -2034,8 +2056,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> BG &lt;60 mg/dL with altered LOC, unable to take PO</div>
         <div><span style="font-weight:700;color:#64748B;">Note:</span> Always give Thiamine 100mg IV BEFORE D50 if alcoholic (prevents Wernicke's)</div>
       </div>
-    </div>
-    <div class="card" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Adult: 25g (50mL of D50) IV slow push</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Pediatric: D25 — 2–4 mL/kg IV (osmotic injury risk with D50 in kids)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Always give Thiamine 100mg IV BEFORE D50 in alcoholic patients</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Hypoglycemia with altered LOC — unable to take PO glucose</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">BG < 60 mg/dL with symptoms</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Seizure caused by hypoglycemia</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Do NOT give if blood glucose not confirmed low (hyperglycemia + D50 = harm)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Not for conscious patient who can take oral glucose</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Always check BG BEFORE giving — never empirical</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Glucose will rise within 1–3 min IV</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Recheck BG 10 min post-dose — may drop again (insulin still circulating)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Thiamine FIRST in alcoholics prevents Wernicke's encephalopathy</span></div></div></div>
+    <div class="med-card-wrap"><div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Glucagon</strong>
         <span class="badge b-amber">Hypoglycemia (no IV)</span>
@@ -2045,12 +2067,12 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Hypoglycemia — unconscious patient, no IV access</div>
         <div><span style="font-weight:700;color:#64748B;">Note:</span> Takes 10–15 min to work, less effective in malnourished/depleted glycogen stores</div>
       </div>
-    </div>
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Adult: 1mg IM or SQ</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Pediatric (<20kg): 0.5mg IM</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Hypoglycemia — unconscious, no IV access</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Beta-blocker or calcium channel blocker overdose (high-dose, ALS/orders)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Phaeochromocytoma (rare)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Insulinoma (rare)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Onset 10–15 min — much slower than IV dextrose</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Less effective in malnourished patients — depleted glycogen stores</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Patient will likely vomit on waking — have suction ready</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">After glucagon works, give oral glucose to replenish stores</span></div></div></div>
   </div>
 
   <p class="sec-label">Allergic / anaphylaxis</p>
   <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
-    <div class="card" style="padding:11px 14px;">
+    <div class="med-card-wrap"><div class="card" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Diphenhydramine (Benadryl)</strong>
         <span class="badge b-blue">Allergic reaction</span>
@@ -2060,8 +2082,8 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Allergic reaction — adjunct to Epi, NOT a replacement</div>
         <div><span style="font-weight:700;color:#64748B;">Note:</span> Causes drowsiness — monitor airway</div>
       </div>
-    </div>
-    <div class="card als-only" style="padding:11px 14px;">
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">25–50mg IV or IM</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Pediatric: 1mg/kg IM (max 50mg)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Allergic reaction — adjunct to epinephrine</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Urticaria (hives) without systemic anaphylaxis</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Mild allergic reaction not requiring Epi</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Do NOT use as primary treatment for anaphylaxis — Epi first, always</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Urinary retention / enlarged prostate (relative)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Glaucoma (relative)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Does NOT replace epinephrine in anaphylaxis — adjunct only</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Causes drowsiness — patient should not drive</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">IV administration can cause hypotension if pushed too fast — give slow</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">H1 blocker only — for complete coverage add ranitidine (H2 blocker) at hospital</span></div></div></div>
+    <div class="med-card-wrap"><div class="card als-only" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Methylprednisolone (Solu-Medrol)</strong> <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;">ALS</span>
         <span class="badge b-blue">Anaphylaxis / COPD</span>
@@ -2071,12 +2093,12 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Anaphylaxis (prevents biphasic), severe asthma/COPD</div>
         <div><span style="font-weight:700;color:#64748B;">Note:</span> Slow onset — 4–6 hours for full effect</div>
       </div>
-    </div>
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Anaphylaxis: 125mg IV</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Severe asthma/COPD: 80–125mg IV</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">Spinal cord injury (controversial/protocol): 30mg/kg IV over 15 min</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Anaphylaxis — prevents biphasic reaction (onset 4–6 hours)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Severe asthma or COPD exacerbation</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Severe allergic reaction</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Systemic fungal infections</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Relative: diabetes (causes hyperglycemia), immunosuppression</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Slow onset — 4–6 hours for full effect; do NOT delay Epi waiting for steroid</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Steroid effect prevents secondary (biphasic) anaphylaxis reaction hours later</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Give IV — IM absorption is unpredictable in shock states</span></div></div></div>
   </div>
 
   <p class="sec-label als-only">OB / obstetrics</p>
   <div class="als-only" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
-    <div class="card als-only" style="padding:11px 14px;">
+    <div class="med-card-wrap"><div class="card als-only" style="padding:11px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:5px;">
         <strong style="font-size:13.5px;">Oxytocin (Pitocin)</strong> <span style="background:#EDE9FE;color:#6D28D9;font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;margin-left:4px;">ALS</span>
         <span class="badge b-blue">Postpartum hemorrhage</span>
@@ -2086,7 +2108,7 @@ body { margin: 0; }
         <div><span style="font-weight:700;color:#64748B;">When:</span> Postpartum hemorrhage (PPH) — uterine atony</div>
         <div><span style="font-weight:700;color:#64748B;">Contra:</span> Before delivery of placenta / before delivery of 2nd twin</div>
       </div>
-    </div>
+    </div><div class="med-tooltip"><div class="med-tooltip-row"><span class="med-tooltip-label">Dose:</span><span class="med-tooltip-val">10 units IM after placenta delivery</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Postpartum hemorrhage (PPH)</span></div><div class="med-tooltip-row"><span class="med-tooltip-label">Indication:</span><span class="med-tooltip-val">Uterine atony after delivery</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Before delivery of placenta</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Before delivery of second twin</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#991B1B;">⚠ Contra:</span><span class="med-tooltip-val">Hypersensitivity to oxytocin</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Give ONLY after placenta is confirmed delivered</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">Uterine massage enhances oxytocin effect</span></div><div class="med-tooltip-row"><span class="med-tooltip-label" style="color:#0F6E56;">✓ Note:</span><span class="med-tooltip-val">May cause hypotension if given IV push — IM is the prehospital route</span></div></div></div>
   </div>
 
   <div style="background:var(--c-red-bg,#FEF2F2);border:1px solid var(--c-red-mid,#FECACA);border-radius:8px;padding:10px 13px;font-size:12px;color:#991B1B;margin-top:8px;">
@@ -2212,6 +2234,71 @@ body { margin: 0; }
       Select a complaint above to generate a protocol guide.
     </div>
   </div>
+</div>
+
+<!-- ══ TIMERS TAB ══ -->
+<div id="ems-timers" class="tab">
+  <p class="sec-label">⏱️ Scene &amp; CPR timers</p>
+
+  <!-- Scene timer -->
+  <div class="card" style="margin-bottom:12px;">
+    <h3 style="margin:0 0 10px;">🚑 Scene timer</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 10px;">Start on arrival. Target: &lt;10 min scene time for trauma.</p>
+    <div style="font-size:36px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;color:var(--color-text);text-align:center;padding:8px 0;font-family:monospace;" id="scene-timer-display">00:00</div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button onclick="sceneTimerStart()" id="scene-start-btn" style="flex:1;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid var(--c-green);color:var(--c-green);background:transparent;cursor:pointer;font-family:var(--font-sans);">▶ Start</button>
+      <button onclick="sceneTimerStop()" style="flex:1;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid var(--c-amber);color:var(--c-amber);background:transparent;cursor:pointer;font-family:var(--font-sans);">⏸ Pause</button>
+      <button onclick="sceneTimerReset()" style="flex:1;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid var(--color-border-2);color:var(--color-text-2);background:transparent;cursor:pointer;font-family:var(--font-sans);">↺ Reset</button>
+    </div>
+    <div id="scene-timer-warn" style="display:none;margin-top:8px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:#991B1B;text-align:center;">⚠️ 10-minute scene time exceeded — transport immediately</div>
+  </div>
+
+  <!-- CPR timer -->
+  <div class="card" style="margin-bottom:12px;">
+    <h3 style="margin:0 0 6px;">❤️ CPR cycle timer</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 10px;">2-minute compressor cycles. Announces switch at 0:00.</p>
+    <div style="font-size:36px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;color:var(--color-text);text-align:center;padding:8px 0;font-family:monospace;" id="cpr-timer-display">02:00</div>
+    <div style="font-size:12px;text-align:center;color:var(--color-text-3);margin-bottom:8px;">Cycle <span id="cpr-cycle-count">1</span></div>
+    <div style="display:flex;gap:8px;margin-top:2px;">
+      <button onclick="cprTimerStart()" id="cpr-start-btn" style="flex:1;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid var(--c-green);color:var(--c-green);background:transparent;cursor:pointer;font-family:var(--font-sans);">▶ Start</button>
+      <button onclick="cprTimerStop()" style="flex:1;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid var(--c-amber);color:var(--c-amber);background:transparent;cursor:pointer;font-family:var(--font-sans);">⏸ Pause</button>
+      <button onclick="cprTimerReset()" style="flex:1;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid var(--color-border-2);color:var(--color-text-2);background:transparent;cursor:pointer;font-family:var(--font-sans);">↺ Reset</button>
+    </div>
+    <div id="cpr-switch-alert" style="display:none;margin-top:8px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:800;color:#991B1B;text-align:center;animation:mci-pulse 0.8s ease-in-out infinite;">🔄 SWITCH COMPRESSORS</div>
+  </div>
+
+  <!-- Epinephrine timer -->
+  <div class="card als-only" style="margin-bottom:12px;">
+    <h3 style="margin:0 0 6px;">💉 Epinephrine timer <span style="font-size:11px;font-weight:600;color:var(--color-text-3);">(ALS)</span></h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 10px;">Counts up from last dose. Epi 1mg IV/IO q3–5 min in arrest. Alert fires at 3 min.</p>
+    <div style="font-size:36px;font-weight:900;letter-spacing:2px;font-variant-numeric:tabular-nums;color:var(--color-text);text-align:center;padding:8px 0;font-family:monospace;" id="epi-timer-display">00:00</div>
+    <div style="font-size:12px;text-align:center;color:var(--color-text-3);margin-bottom:8px;">Dose <span id="epi-dose-count">0</span> given</div>
+    <div style="display:flex;gap:8px;margin-top:2px;">
+      <button onclick="epiDoseGiven()" style="flex:2;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid #991B1B;color:#991B1B;background:transparent;cursor:pointer;font-family:var(--font-sans);">💉 Dose given — restart timer</button>
+      <button onclick="epiTimerReset()" style="flex:1;padding:8px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid var(--color-border-2);color:var(--color-text-2);background:transparent;cursor:pointer;font-family:var(--font-sans);">↺ Reset</button>
+    </div>
+    <div id="epi-due-alert" style="display:none;margin-top:8px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:800;color:#991B1B;text-align:center;animation:mci-pulse 0.8s ease-in-out infinite;">💉 EPI DUE — consider next dose (3–5 min window)</div>
+  </div>
+
+  <!-- Tourniquet log -->
+  <div class="card" style="margin-bottom:12px;">
+    <h3 style="margin:0 0 6px;">🩹 Tourniquet log</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 10px;">Log application time and limb. Hospital needs exact time. 2-hour window before tissue risk.</p>
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+      <select id="tq-limb" style="flex:1;padding:6px 8px;border-radius:6px;border:1.5px solid var(--color-border-2);background:var(--color-bg);color:var(--color-text);font-size:13px;font-family:var(--font-sans);">
+        <option value="">— select limb —</option>
+        <option value="R arm">Right arm</option>
+        <option value="L arm">Left arm</option>
+        <option value="R leg">Right leg</option>
+        <option value="L leg">Left leg</option>
+      </select>
+      <button onclick="tqAdd()" style="padding:7px 14px;font-size:12.5px;font-weight:700;border-radius:8px;border:1.5px solid #991B1B;color:#991B1B;background:transparent;cursor:pointer;font-family:var(--font-sans);">+ Log TQ</button>
+    </div>
+    <div id="tq-list" style="font-size:12.5px;"></div>
+  </div>
+
+  <!-- Clear all -->
+  <button onclick="timersResetAll()" style="width:100%;padding:8px;font-size:12px;font-weight:600;border-radius:8px;border:1.5px solid var(--color-border-2);color:var(--color-text-3);background:transparent;cursor:pointer;font-family:var(--font-sans);margin-bottom:8px;">↺ Reset all timers</button>
 </div>
 
 <!-- ── Report Writer Tab ── -->
@@ -2343,6 +2430,7 @@ body { margin: 0; }
   <button class="nav-btn" onclick="leoTab('stops',this)">🛑 Traffic Stops</button>
   <button class="nav-btn" onclick="leoTab('statutes',this)">📋 Statutes</button>
   <button class="nav-btn" onclick="leoTab('leodtree',this)">🔀 Decision Tree</button>
+  <button class="nav-btn" onclick="leoTab('leoreports',this)">📝 Report Writer</button>
 </div>
 
 <!-- LEO Pinned -->
@@ -2461,6 +2549,9 @@ body { margin: 0; }
     <button class="spill" onclick="leoScene('dispatch',this)">Dispatch</button>
     <button class="spill" onclick="leoScene('search',this)">Search / K9</button>
     <button class="spill" onclick="leoScene('owi',this)">OWI Stop</button>
+    <button class="spill" onclick="leoScene('welfare',this)">🔔 Welfare Check</button>
+    <button class="spill" onclick="leoScene('dv',this)">🏠 DV Response</button>
+    <button class="spill" onclick="leoScene('shots',this)">🔫 Shots Fired</button>
   </div>
 
   <div class="card scene-card vis" id="leo-sc-stop">
@@ -2567,7 +2658,100 @@ body { margin: 0; }
   </div>
 </div>
 
-<!-- 10-CODES -->
+<!-- LEO WELFARE / DV / SHOTS scene cards appended inside leo-rp -->
+<script>
+/* Inject the three new LEO RP scene cards into leo-rp after DOM ready */
+(function() {
+  function injectLeoScenes() {
+    var rp = document.getElementById('leo-rp');
+    if (!rp) return;
+
+    /* ── Welfare Check ── */
+    var welfare = document.createElement('div');
+    welfare.className = 'card scene-card';
+    welfare.id = 'leo-sc-welfare';
+    welfare.innerHTML = [
+      '<h3>Welfare check</h3>',
+      '<div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Notify dispatch on arrival</strong><span>',
+      '<div class="rp-box" style="border-color:#185FA5;"><div class="rp-label" style="color:#185FA5;">On scene</div><div class="rp-script"><em>"Dispatch, OCSO-[unit], on scene at [address] for welfare check on [name / description]."</em></div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🚪</span><div class="ptxt"><strong>Initial contact — no answer</strong><span>',
+      '<div class="rp-box" style="border-color:#854F0B;"><div class="rp-label" style="color:#854F0B;">Door knock protocol</div><div class="rp-script"><em>"[Name], this is OCSO — just checking on you. Please come to the door."</em><br>-waits 30–60 seconds, attempts again-<br>-checks for signs of life: lights, sounds, movement-<br>-contacts requesting party for last known info-</div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🔍</span><div class="ptxt"><strong>Exigent circumstances — forced entry</strong><span>',
+      '<div class="rp-box" style="border-color:#A32D2D;"><div class="rp-label" style="color:#A32D2D;">Exigency found</div><div class="rp-script"><em>"Dispatch, OCSO-[unit], exigent circumstances — [blood visible / smell / open door / not heard from in X days]. Making entry. Need backup."</em><br>-enters and announces: <em>"OCSO — anyone home? Police!"</em></div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🏥</span><div class="ptxt"><strong>Subject found — medical</strong><span>',
+      '<div class="rp-box" style="border-color:#A32D2D;"><div class="rp-label" style="color:#A32D2D;">Medical emergency found</div><div class="rp-script"><em>"Dispatch, OCSO-[unit], EMS needed at [address] — [subject found unresponsive / injured]. Requesting EMS priority."</em></div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">✅</span><div class="ptxt"><strong>All clear</strong><span>',
+      '<div class="rp-box" style="border-color:#3B6D11;"><div class="rp-label" style="color:#3B6D11;">Clear</div><div class="rp-script"><em>"Dispatch, OCSO-[unit], welfare check clear. Subject [located and OK / not home / transported by EMS]. 10-8."</em></div></div>',
+      '</span></div></div>',
+    ].join('');
+    rp.appendChild(welfare);
+
+    /* ── DV Response ── */
+    var dv = document.createElement('div');
+    dv.className = 'card scene-card';
+    dv.id = 'leo-sc-dv';
+    dv.innerHTML = [
+      '<h3>Domestic violence response</h3>',
+      '<div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>En route</strong><span>',
+      '<div class="rp-box" style="border-color:#185FA5;"><div class="rp-label" style="color:#185FA5;">Dispatch</div><div class="rp-script"><em>"OCSO-[unit] responding to [address] for domestic disturbance. ETA [X]."</em><br>-approach quietly, no lights/sirens close to address-<br>-listen before knocking-</div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🚪</span><div class="ptxt"><strong>Scene arrival — separate parties immediately</strong><span>',
+      '<div class="rp-box" style="border-color:#854F0B;"><div class="rp-label" style="color:#854F0B;">Separation</div><div class="rp-script"><em>"I need everyone to step back. [Person A], can you come with me to the kitchen. [Person B], stay here with my partner."</em><br>-never interview parties in same room-<br>-document all injuries with photos-</div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">📋</span><div class="ptxt"><strong>Victim interview</strong><span>',
+      '<div class="rp-box" style="border-color:#534AB7;"><div class="rp-label" style="color:#534AB7;">Victim contact</div><div class="rp-script"><em>"I\'m here to help you, not judge. Tell me what happened tonight. Did he/she hit you? Show me where. Did you see any weapons?"</em><br>-document verbatim statements in report-<br>-identify primary aggressor — not always the one who called-</div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">⚖️</span><div class="ptxt"><strong>Wisconsin mandatory arrest</strong><span>',
+      '<div class="rp-box" style="border-color:#A32D2D;"><div class="rp-label" style="color:#A32D2D;">Mandatory arrest trigger</div><div class="rp-script">If <strong>physical injury is visible</strong> or <strong>physical contact was made</strong> — Wisconsin law <strong>requires arrest</strong> of primary aggressor.<br><em>"[Name], I am placing you under arrest for domestic battery. You do not have a choice in this. Turn around."</em></div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🛡️</span><div class="ptxt"><strong>Victim safety planning</strong><span>',
+      '<div class="rp-box" style="border-color:#3B6D11;"><div class="rp-label" style="color:#3B6D11;">Resources</div><div class="rp-script"><em>"Here is a DV resource card with shelter and legal information. Is there somewhere safe you can go tonight? Do you want to press charges?"</em><br>Note: victim\'s choice to "press charges" does NOT affect arrest decision in WI mandatory arrest law.</div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Clear radio</strong><span>',
+      '<div class="rp-box" style="border-color:#185FA5;"><div class="rp-label" style="color:#185FA5;">Transport</div><div class="rp-script"><em>"Dispatch, OCSO-[unit], domestic — [one in custody / no arrest / report only]. Transporting [one] to OC Jail, charged with domestic battery. Victim [on scene / transported to hospital / refused]."</em></div></div>',
+      '</span></div></div>',
+    ].join('');
+    rp.appendChild(dv);
+
+    /* ── Shots Fired / Active Shooter ── */
+    var shots = document.createElement('div');
+    shots.className = 'card scene-card';
+    shots.id = 'leo-sc-shots';
+    shots.innerHTML = [
+      '<h3>Shots fired / active shooter</h3>',
+      '<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;color:#991B1B;margin-bottom:10px;">🔴 PRIORITY — THREAT TO LIFE. First responder protocol applies.</div>',
+      '<div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Immediate dispatch — shots fired</strong><span>',
+      '<div class="rp-box" style="border-color:#A32D2D;"><div class="rp-label" style="color:#A32D2D;">10-32 / shots fired</div><div class="rp-script"><em>"Dispatch, OCSO-[unit], 10-32, shots fired at [location]. [X] shots heard / [active shooting]. Last direction of [shots / suspect]. Requesting all available units and notification of [WSP / EMS]."</em></div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🛡️</span><div class="ptxt"><strong>Approach — do NOT rush in alone</strong><span>',
+      '<div class="rp-box" style="border-color:#A32D2D;"><div class="rp-label" style="color:#A32D2D;">Staging</div><div class="rp-script">-stage outside threat perimeter — wait for backup unless active threat with immediate victims-<br>-identify suspect description, last position, direction of travel-<br>-establish command post upwind / uphill from incident-</div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">⚡</span><div class="ptxt"><strong>Active shooter protocol (ALERRT)</strong><span>',
+      '<div class="rp-box" style="border-color:#854F0B;"><div class="rp-label" style="color:#854F0B;">Contact team</div><div class="rp-script">Move toward threat — do NOT stop to render aid until threat is neutralized.<br><em>"Moving toward threat — [location]. Contact [X] units."</em><br>-clear rooms systematically — announce: <em>"POLICE — CLEAR!"</em><br>-neutralize threat first — medical comes after</div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🏥</span><div class="ptxt"><strong>Rescue task force — after threat neutralized</strong><span>',
+      '<div class="rp-box" style="border-color:#185FA5;"><div class="rp-label" style="color:#185FA5;">EMS integration</div><div class="rp-script"><em>"Dispatch, threat neutralized at [location]. Requesting EMS to [warm zone / safe staging]. [X] casualties visible. [Suspect status: in custody / deceased]."</em></div></div>',
+      '</span></div></div>',
+      '<div class="prow"><span class="picon">🔒</span><div class="ptxt"><strong>Scene lockdown &amp; documentation</strong><span>',
+      '<div class="rp-box" style="border-color:#534AB7;"><div class="rp-label" style="color:#534AB7;">Post-threat</div><div class="rp-script">-establish hard perimeter — no unauthorized entry-<br>-document own firearm status (rounds fired, any injuries)-<br>-notify supervisor immediately if firearm discharged-<br><em>"Dispatch, OCSO-[unit], discharge of firearm. No [officer / subject] injuries / [officer / subject] injured. Requesting supervisor to scene."</em></div></div>',
+      '</span></div></div>',
+    ].join('');
+    rp.appendChild(shots);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectLeoScenes);
+  } else {
+    injectLeoScenes();
+  }
+})();
+</script>
+
+<!-- LEO CODES -->
 <div id="leo-codes" class="tab">
   <p class="sec-label">Brevity codes — OCSO / WSP radio standard</p>
 
@@ -2721,6 +2905,11 @@ body { margin: 0; }
 <!-- STATUTES -->
 <div id="leo-statutes" class="tab">
   <p class="sec-label">Wisconsin traffic &amp; criminal statutes — quick reference</p>
+  <div style="margin-bottom:12px;position:relative;">
+    <input type="text" id="statute-search" placeholder="Search statute number or offense…" oninput="filterStatutes(this.value)" autocomplete="off" style="width:100%;box-sizing:border-box;padding:8px 34px 8px 12px;border:1.5px solid var(--color-border-2);border-radius:8px;font-size:13px;font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);outline:none;">
+    <span onclick="document.getElementById('statute-search').value='';filterStatutes('')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--color-text-3);font-size:14px;">✕</span>
+  </div>
+  <div id="statute-no-results" style="display:none;text-align:center;padding:16px;color:var(--color-text-3);font-size:13px;">No statutes match your search.</div>
   <div class="codes-2col">
     <div>
       <p class="sec-label" style="margin-top:0">Traffic statutes (Ch. 346)</p>
@@ -2860,6 +3049,85 @@ body { margin: 0; }
 </div>
 
 </div><!-- /app-leo -->
+
+<!-- LEO INCIDENT REPORT WRITER — injected here as a sibling tab under app-leo -->
+<script>
+(function() {
+  function injectLeoReportWriter() {
+    var appLeo = document.getElementById('app-leo');
+    if (!appLeo) return;
+
+    var tab = document.createElement('div');
+    tab.id = 'leo-leoreports';
+    tab.className = 'tab';
+    tab.innerHTML = [
+      '<p class="sec-label">📝 Incident Report Writer — fill in details, generate a formatted report</p>',
+
+      '<div class="rw-section">',
+        '<div class="rw-section-title" style="color:var(--color-text);">Call &amp; Officer Info</div>',
+        '<div class="rw-grid">',
+          '<div class="rw-field"><label>Unit / Callsign</label><input id="lr-unit" type="text" placeholder="OCSO-4" /></div>',
+          '<div class="rw-field"><label>Report Type</label><select id="lr-type" style="width:100%;padding:7px 10px;border:1.5px solid var(--color-border-2);border-radius:6px;font-size:13px;font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);"><option>Incident / Arrest</option><option>Traffic Stop</option><option>Use of Force</option><option>Domestic Violence</option><option>Welfare Check</option><option>Field Interview</option><option>Accident Investigation</option></select></div>',
+          '<div class="rw-field"><label>Incident Date / Time</label><input id="lr-datetime" type="text" placeholder="06/15/2026 14:35" /></div>',
+          '<div class="rw-field"><label>Location / Address</label><input id="lr-location" type="text" placeholder="1234 Oak St, Greenville" /></div>',
+        '</div>',
+      '</div>',
+
+      '<div class="rw-section">',
+        '<div class="rw-section-title" style="color:var(--color-text);">Subject Information</div>',
+        '<div class="rw-grid">',
+          '<div class="rw-field"><label>Subject Name</label><input id="lr-subname" type="text" placeholder="John Doe" /></div>',
+          '<div class="rw-field"><label>DOB / Age / Sex</label><input id="lr-subdob" type="text" placeholder="01/15/1990 / 36 / M" /></div>',
+          '<div class="rw-field"><label>Subject Description</label><input id="lr-subdesc" type="text" placeholder="White male, 6\'1\", brown hair, blue jacket" /></div>',
+          '<div class="rw-field"><label>Vehicle (if applicable)</label><input id="lr-vehicle" type="text" placeholder="2019 Blue Honda Civic, WI ABC1234" /></div>',
+        '</div>',
+      '</div>',
+
+      '<div class="rw-section">',
+        '<div class="rw-section-title" style="color:var(--color-text);">Incident Narrative</div>',
+        '<div class="rw-grid">',
+          '<div class="rw-field"><label>Reason for Contact</label><input id="lr-reason" type="text" placeholder="Observed vehicle traveling 57 in 35 zone" /></div>',
+          '<div class="rw-field"><label>Charges / Violations</label><input id="lr-charges" type="text" placeholder="346.57(4)(b) Speeding, 946.41 Resisting" /></div>',
+          '<div class="rw-field" style="grid-column:1/-1;"><label>Narrative — what happened (use first person, past tense)</label><textarea id="lr-narrative" rows="4" placeholder="On the above date and time, I was on patrol when I observed a blue Honda Civic traveling northbound on Oak Street at an estimated speed of..."></textarea></div>',
+          '<div class="rw-field"><label>Subject Statements (verbatim if possible)</label><textarea id="lr-statements" rows="2" placeholder="Subject stated: \'I didn\'t know how fast I was going.\'"></textarea></div>',
+          '<div class="rw-field"><label>Evidence / Contraband Recovered</label><input id="lr-evidence" type="text" placeholder="None / [describe items]" /></div>',
+        '</div>',
+      '</div>',
+
+      '<div class="rw-section">',
+        '<div class="rw-section-title" style="color:var(--color-text);">Disposition</div>',
+        '<div class="rw-grid">',
+          '<div class="rw-field"><label>Action Taken</label><select id="lr-disposition" style="width:100%;padding:7px 10px;border:1.5px solid var(--color-border-2);border-radius:6px;font-size:13px;font-family:var(--font-sans);background:var(--color-bg);color:var(--color-text);"><option>Warning issued</option><option>Citation issued</option><option>Arrested — transported to OC Jail</option><option>EMS requested / transported</option><option>Subject released on scene</option><option>BOLO broadcast</option><option>Referred to detective</option></select></div>',
+          '<div class="rw-field"><label>Witnesses (name, contact)</label><input id="lr-witnesses" type="text" placeholder="None / Jane Smith, 555-0100" /></div>',
+          '<div class="rw-field"><label>Other units on scene</label><input id="lr-otherunits" type="text" placeholder="OCSO-2, WSP-14" /></div>',
+          '<div class="rw-field"><label>Additional notes</label><input id="lr-notes" type="text" placeholder="Body cam footage available" /></div>',
+        '</div>',
+      '</div>',
+
+      '<div class="rw-section" style="margin-bottom:8px;">',
+        '<button class="assess-btn" onclick="leoGenReport()" style="margin-bottom:10px;">📄 Generate report</button>',
+        '<button onclick="leoReportClear()" style="font-size:12px;padding:6px 14px;border-radius:20px;border:1.5px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">↺ Clear</button>',
+      '</div>',
+
+      '<div style="display:none;" id="lr-output-wrap">',
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">',
+          '<p class="sec-label" style="margin:0;">Generated report</p>',
+          '<button onclick="leoReportCopy()" style="font-size:11.5px;font-weight:600;padding:4px 12px;border-radius:20px;border:1.5px solid var(--c-blue);color:var(--c-blue);background:transparent;cursor:pointer;font-family:var(--font-sans);">📋 Copy</button>',
+        '</div>',
+        '<textarea id="lr-output" rows="14" readonly style="width:100%;box-sizing:border-box;padding:12px;border:1.5px solid var(--color-border-2);border-radius:8px;font-size:12.5px;line-height:1.65;background:var(--color-bg-secondary);color:var(--color-text);font-family:monospace;resize:vertical;"></textarea>',
+      '</div>',
+    ].join('');
+
+    appLeo.appendChild(tab);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectLeoReportWriter);
+  } else {
+    injectLeoReportWriter();
+  }
+})();
+</script>
 </div><!-- /wrap -->
 
 <script>
@@ -2970,6 +3238,26 @@ function pickAVPU(v, btn) {
 function gv(id){var v=document.getElementById(id).value;return v===''?null:parseFloat(v);}
 function gc(id){return document.getElementById(id).checked;}
 function runAssess() {
+  /* ── Input validation ── */
+  var errMsgs = [];
+  var sbpRaw = document.getElementById('t-sbp').value;
+  var dbpRaw = document.getElementById('t-dbp').value;
+  var hrRaw  = document.getElementById('t-hr').value;
+  var rrRaw  = document.getElementById('t-rr').value;
+  var spo2Raw= document.getElementById('t-spo2').value;
+  var gcsRaw = document.getElementById('t-gcs').value;
+  if (sbpRaw !== '' && (parseFloat(sbpRaw) < 0 || parseFloat(sbpRaw) > 300))  errMsgs.push('SBP out of range (0–300 mmHg)');
+  if (dbpRaw !== '' && (parseFloat(dbpRaw) < 0 || parseFloat(dbpRaw) > 200))  errMsgs.push('DBP out of range (0–200 mmHg)');
+  if (hrRaw  !== '' && (parseFloat(hrRaw)  < 0 || parseFloat(hrRaw)  > 300))  errMsgs.push('Heart rate out of range (0–300 bpm)');
+  if (rrRaw  !== '' && (parseFloat(rrRaw)  < 0 || parseFloat(rrRaw)  > 60))   errMsgs.push('Respirations out of range (0–60 /min)');
+  if (spo2Raw!== '' && (parseFloat(spo2Raw)< 0 || parseFloat(spo2Raw)> 100))  errMsgs.push('SpO2 out of range (0–100 %)');
+  if (gcsRaw !== '' && (parseFloat(gcsRaw) < 3 || parseFloat(gcsRaw) > 15))   errMsgs.push('GCS out of range (3–15)');
+  if (sbpRaw !== '' && dbpRaw !== '' && parseFloat(sbpRaw) <= parseFloat(dbpRaw)) errMsgs.push('SBP must be greater than DBP');
+  if (errMsgs.length) {
+    document.getElementById('assess-result').innerHTML = '<div class="result-card" style="background:#FFFBEB;border-color:#FDE68A;"><p class="r-label" style="color:#92400E;">⚠️ Input error — please correct:</p><ul style="margin:6px 0 0;padding-left:18px;font-size:12.5px;color:#92400E;">' + errMsgs.map(function(m){return '<li>'+m+'</li>';}).join('') + '</ul></div>';
+    document.getElementById('assess-specific').innerHTML = '';
+    return;
+  }
   var sbp=gv('t-sbp'),hr=gv('t-hr'),rr=gv('t-rr'),spo2=gv('t-spo2'),gcs=gv('t-gcs');
   var flags=[],score=0;
   var noPulse=gc('c-nopulse'),airway=gc('c-airway'),bleed=gc('c-bleed');
@@ -3028,6 +3316,33 @@ function runAssess() {
   var vHTML='';
   if(sbp!==null||hr!==null||rr!==null||spo2!==null||gcs!==null){vHTML='<div class="vitals-row">';if(sbp!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">BP syst.</p><p class="vi-val" style="color:'+pc+'">'+Math.round(sbp)+' mmHg</p></div>';if(hr!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">HR</p><p class="vi-val" style="color:'+pc+'">'+Math.round(hr)+' bpm</p></div>';if(rr!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">RR</p><p class="vi-val" style="color:'+pc+'">'+Math.round(rr)+'/min</p></div>';if(spo2!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">SpO2</p><p class="vi-val" style="color:'+pc+'">'+Math.round(spo2)+'%</p></div>';if(gcs!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">GCS</p><p class="vi-val" style="color:'+pc+'">'+Math.round(gcs)+'/15</p></div>';if(avpuVal)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">AVPU</p><p class="vi-val" style="color:'+pc+'">'+avpuVal+'</p></div>';vHTML+='</div>';}
   document.getElementById('assess-result').innerHTML='<div class="result-card" style="background:'+bg+';border-color:'+bc+'"><p class="r-label" style="color:'+lc+'">'+sublabel+'</p><p class="r-priority" style="color:'+pc+'">'+priority+'</p>'+vHTML+'<p class="r-desc" style="color:'+dc+'">'+desc+'</p><p class="r-actions" style="color:'+lc+'">→ '+actions+'</p><div class="r-flags">'+fHTML+'</div></div>';
+
+  /* ── Specific assessments based on signs & symptoms ── */
+  var specCards = [];
+  if (strokeSx) specCards.push({icon:'🧠',title:'Code Stroke — BEFAST screen',color:'#991B1B',bg:'#FEF2F2',border:'#FECACA',steps:['Run BEFAST: Balance · Eyes · Face · Arms · Speech · Time','Note exact Last Known Normal (LKN) time — tPA eligibility is time-dependent','Do NOT lower BP aggressively — permissive hypertension preferred','Blood glucose check — hypoglycemia mimics stroke exactly','12-lead ECG — A-fib can cause embolic stroke (ALS)','NPO — dysphagia risk; do not give anything orally','Rapid transport to stroke-capable hospital — notify en route'],radio:'"[Hospital], Medic 1 inbound — Code Stroke. LKN [time]. BEFAST: [findings]. GCS [X], BP [X/X]. ETA [X]."'});
+  if (chest && !noPulse) specCards.push({icon:'❤️',title:'Chest pain — ACS protocol',color:'#1D4ED8',bg:'#EFF6FF',border:'#BFDBFE',steps:['12-lead ECG within 10 min of contact — identify STEMI pattern (ALS)','Aspirin 324mg PO chewed — if not contraindicated and no known allergy','Position: semi-Fowler (45°) unless hypotensive → supine + legs elevated','O2 only if SpO2 < 94% — hyperoxia is harmful in ACS','IV access x2, cardiac monitor, pulse ox, continuous monitoring (ALS)','Nitroglycerin — only if SBP > 100 and no PDE5 inhibitors in 24–48hr (ALS/orders)','Serial 12-lead q5 min if initial non-diagnostic (ALS)','Notify hospital early — cath lab activation if STEMI confirmed'],radio:'"[Hospital], Medic 1 inbound — chest pain / ACS. 12-lead [normal / STEMI / NSTEMI pattern]. BP [X/X], HR [X]. Aspirin given. ETA [X]."'});
+  if (noPulse) specCards.push({icon:'🫀',title:'Cardiac arrest — resuscitation',color:'#7C3AED',bg:'#F5F3FF',border:'#DDD6FE',steps:['High-quality CPR: 100–120/min, 2–2.4 in depth, full recoil, &lt;10 sec interruptions','AED pads on immediately — analyze and shock VF/pVT as soon as available','Switch compressors every 2 minutes — use the CPR cycle timer','Epinephrine 1mg IV/IO q3–5 min (ALS) — use epi timer tab','Establish IV/IO access during CPR — do NOT pause compressions for access','Waveform capnography: ETCO2 &gt;10 = effective CPR; sudden rise = ROSC (ALS)','Reversible causes (Hs & Ts): hypoxia, hypovolemia, tension pneumo, tamponade, hypothermia, toxins, thrombosis','ROSC: 12-lead, controlled O2 (94–99%), temperature management consideration'],radio:'"[Hospital], Medic 1 inbound — cardiac arrest. CPR ongoing / ROSC at [time]. [Shocks: X]. Rhythm [VF/PEA/asystole]. ETA [X]."'});
+  if (anaphylaxis) specCards.push({icon:'🩺',title:'Anaphylaxis protocol',color:'#065F46',bg:'#F0FDF4',border:'#BBF7D0',steps:['Epinephrine 0.3mg IM — anterolateral thigh (EpiPen / auto-injector)','Remove allergen / stop exposure immediately','O2 high-flow via NRB — airway compromise is the kill mechanism','Position: supine + legs elevated if hypotensive; upright if respiratory distress','Diphenhydramine 25–50mg IM adjunct — does NOT replace Epi','Second dose Epi in 5–15 min if no improvement (ALS)','IV NS bolus for hypotension (ALS)','Warn patient: biphasic reaction possible up to 8 hours — hospital observation mandatory'],radio:'"[Hospital], Medic 1 inbound — anaphylaxis. Epi given at [time]. Airway [patent / compromised]. BP [X/X], HR [X]. ETA [X]."'});
+  if (hypoglycemia || (sbp !== null && sbp > 0 && gcs !== null && gcs < 15 && !strokeSx)) specCards.push({icon:'🩸',title:'Hypoglycemia assessment',color:'#D97706',bg:'#FFFBEB',border:'#FDE68A',steps:['Blood glucose FIRST — do not assume cause of AMS without BG','BG &lt;60 mg/dL = treat; BG 60–80 with symptoms = treat','Conscious and able to swallow: 15–20g oral glucose (gel, juice, tablets)','Unconscious or cannot protect airway: do NOT give PO — IV/IO route only (ALS)','D50 25g IV push; or Glucagon 1mg IM if no IV access (ALS)','Reassess BG in 10 minutes after treatment','Thiamine 100mg IV before glucose if alcoholism suspected (ALS — Wernicke\'s prevention)','Note: hypoglycemia perfectly mimics stroke — reassess stroke symptoms after BG correction'],radio:'"[Hospital], Medic 1 inbound — hypoglycemia. BG [X] pre / [X] post-treatment. [Conscious/unconscious]. Given [gel/D50/glucagon]. ETA [X]."'});
+  if (apneic || (rr !== null && rr < 8)) specCards.push({icon:'🫁',title:'Respiratory arrest / apnea',color:'#991B1B',bg:'#FEF2F2',border:'#FECACA',steps:['BVM ventilations immediately — 1 breath every 5–6 seconds (10–12/min)','OPA (unconscious, no gag reflex) — proper sizing: corner of mouth to earlobe','Two-person BVM preferred — E-C clamp for seal, second person compresses bag','Check for opioid pattern — Narcan 2mg IN/IV empirically if suspected (BLS scope)','100% O2 via BVM — pre-oxygenate before any airway intervention','Suction as needed — vomit is #1 BVM complication','Advanced airway if BVM inadequate — King LT or ETT (ALS)','Waveform capnography after advanced airway placement (ALS) — confirms and monitors'],radio:'"[Hospital], Medic 1 inbound — respiratory arrest. Airway [BVM/King LT/ETT]. [Narcan given]. SpO2 [X]%. ETA [X]."'});
+  if (bleed || amputation) specCards.push({icon:'🩹',title:'Hemorrhage control — MARCH',color:'#991B1B',bg:'#FEF2F2',border:'#FECACA',steps:['Massive hemorrhage FIRST — before airway in trauma (MARCH protocol)','Extremity wound: CAT tourniquet 2–3 inches proximal to wound — note time applied (use TQ log)','Junctional wound (groin / axilla / neck): hemostatic gauze + direct pressure &gt;3 minutes','Wound packing: pack tight, maintain pressure, reassess every 2–3 min','Permissive hypotension target SBP 80–90 — do NOT over-resuscitate (washes clot)','Monitor for tension pneumo in torso trauma: absent breath sounds + shock = needle decompression (ALS)','Track all tourniquet times — hospital must know; tissue damage risk after 2 hours','Log tourniquet in the Timers tab → TQ log'],radio:'"[Hospital], Medic 1 inbound — major hemorrhage. TQ applied [limb] at [time]. BP [X/X], HR [X]. ETA [X]."'});
+  if (seizure) specCards.push({icon:'⚡',title:'Seizure protocol',color:'#5B21B6',bg:'#F5F3FF',border:'#DDD6FE',steps:['Time the seizure from onset — status epilepticus = &gt;5 min or no recovery between seizures','Protect: clear hard objects, cushion head — do NOT restrain, do NOT put anything in mouth','Recovery position post-ictal: lateral decubitus — prevents aspiration','Suction as needed; O2 via NRB after seizure stops','Blood glucose IMMEDIATELY post-ictal — hypoglycemia is a reversible seizure cause','Status epilepticus: Midazolam 10mg IM (fastest) or 5mg IV/IO — or Diazepam 5–10mg IV (ALS)','If still seizing after benzo: rapid transport — needs phenobarbital or propofol at ED (ALS)','Document: onset time, duration, type of activity, post-ictal duration, glucose result'],radio:'"[Hospital], Medic 1 inbound — seizure. Duration [X] min. [Status epilepticus / resolved]. Midazolam [given / not given]. BG [X]. GCS [X]. ETA [X]."'});
+
+  if (specCards.length) {
+    var sHTML = '<p class="sec-label" style="margin-top:4px;">Specific assessments</p>';
+    specCards.forEach(function(c) {
+      sHTML += '<div style="background:'+c.bg+';border:1.5px solid '+c.border+';border-radius:10px;padding:13px 15px;margin-bottom:10px;">';
+      sHTML += '<p style="font-size:13px;font-weight:800;color:'+c.color+';margin:0 0 8px;">'+c.icon+' '+c.title+'</p>';
+      sHTML += '<ol style="margin:0 0 8px;padding-left:18px;font-size:12px;color:'+c.color+';line-height:1.7;">';
+      c.steps.forEach(function(s) { sHTML += '<li>'+s+'</li>'; });
+      sHTML += '</ol>';
+      sHTML += '<div style="background:rgba(0,0,0,.04);border-radius:6px;padding:6px 10px;font-size:11.5px;font-style:italic;color:'+c.color+';line-height:1.5;">📻 '+c.radio+'</div>';
+      sHTML += '</div>';
+    });
+    document.getElementById('assess-specific').innerHTML = sHTML;
+  } else {
+    document.getElementById('assess-specific').innerHTML = '';
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -3791,6 +4106,22 @@ var BLS_TREE = {
   hypoglycemia:{steps:["Blood glucose — confirm &lt;70 mg/dL","Conscious and able to swallow: oral glucose gel 15–20g","Recheck blood glucose in 10–15 minutes","If unconscious or unable to swallow: request ALS intercept for D50 IV","Nothing by mouth if unconscious — aspiration risk","Monitor mental status — should improve with glucose treatment","Transport — identify underlying cause"],meds:["Oral glucose gel 15–20g","Glucagon 1mg IM if no IV and unconscious (per protocol)"],equip:["Glucometer","Oral glucose gel"],radio:"# [Hospital] Medic1 inbound — hypoglycemia. BG [X]. Oral glucose [given/not given]. GCS [X]. ETA [X]."},
   allergic:{steps:["Identify allergen — remove from exposure","Assess severity: hives only (mild) vs systemic symptoms (anaphylaxis)","Anaphylaxis: assist patient with own EpiPen 0.3mg IM if available","O2 high-flow via NRB","Position: supine + legs elevated if hypotensive, upright if respiratory distress","Diphenhydramine 25–50mg IM if available per protocol","Request ALS intercept for anaphylaxis — hospital observation always needed","Monitor every 3 minutes — biphasic reaction possible up to 8 hours later"],meds:["Assist with patient's EpiPen 0.3mg IM","O2 via NRB","Diphenhydramine 25–50mg IM (per protocol)"],equip:["NRB mask","BP cuff","AED standby"],radio:"# [Hospital] Medic1 inbound — anaphylaxis. EpiPen [given/not given]. Airway [patent/compromised]. BP [X/X]. ETA [X]."},
   palpitations:{steps:["Vital signs — HR, BP, SpO2","O2 if SpO2 &lt;95%","Assess for instability: hypotension + tachycardia = ALS intercept now","SAMPLE history — prior episodes, meds, stimulants","Transport for 12-lead evaluation"],meds:["O2 if SpO2 &lt;95%"],equip:["BP cuff","Pulse oximeter","AED standby"],radio:"# [Hospital] Medic1 inbound — palpitations. HR [X] BP [X/X]. [Stable]. ETA [X]."}
+,
+  abdo_pain:{steps:["Position of comfort — knees to chest if cramping","Nothing by mouth — NPO","Vital signs: BP, HR, SpO2","O2 if SpO2 <95%","Note last bowel movement, onset, severity, associated symptoms","Request ALS intercept if rigid abdomen, hypotension, or pregnancy suspected","Transport — all significant abdominal pain needs evaluation"],meds:["O2 if SpO2 <95%"],equip:["BP cuff","Pulse oximeter"],radio:"# [Hospital] Medic1 inbound — abdominal pain. BP [X/X] HR [X]. [Pregnant/not]. ETA [X]."},
+  alcohol_od:{steps:["Scene safety — intoxicated patients are unpredictable","Assess airway — alcohol causes vomiting and aspiration","Recovery position if unconscious and breathing","BVM if respiratory rate under 8","Blood glucose — alcohol causes hypoglycemia","O2 via NRB","Suction available — ready at all times","Transport all unconscious intoxicated patients"],meds:["O2 via NRB","Oral glucose if BG <60 and conscious"],equip:["BVM","Suction","NRB mask","Glucometer"],radio:"# [Hospital] Medic1 inbound — alcohol intoxication. GCS [X] RR [X]. ETA [X]."},
+  amputation:{steps:["Tourniquet immediately — 2–3 inches above amputation, note time","Control residual limb bleeding — direct pressure + hemostatic gauze","Wrap amputated part in moist sterile gauze, seal in plastic bag","Place bagged part on ice — do NOT freeze directly","O2 via NRB","Request ALS intercept for IV access","Rapid transport — replant window is 4–6 hours"],meds:["O2 via NRB"],equip:["CAT tourniquet","Hemostatic gauze","Trauma dressings","Plastic bag + ice"],radio:"# [Hospital] Medic1 inbound — traumatic amputation [limb]. Tourniquet time [XX:XX]. Part preserved. ETA [X]."},
+  burn:{steps:["Stop the burning — remove patient from source, remove clothing","Cool with room-temperature water for 10 min — NOT ice","Rule of Nines: head 9%, each arm 9%, each leg 18%, torso 36%","Dry sterile dressings after cooling — no creams, butter, or ice","Prevent hypothermia — burns destroy thermoregulation","O2 via NRB — 100% for smoke exposure","Request ALS intercept for IV fluid resuscitation if >10% BSA","Rapid transport — airway burns = immediate ALS intercept"],meds:["O2 via NRB","100% O2 NRB for smoke/inhalation"],equip:["Burn dressings (dry sterile)","NRB mask","Blankets"],radio:"# [Hospital] Medic1 inbound — burn patient. Approx [X]% BSA. Airway [clear/concern]. ETA [X]."},
+  co_poisoning:{steps:["Move patient to fresh air immediately","100% O2 via NRB — mandatory for all fire/CO patients","Check ALL occupants — CO affects everyone in the space","Note pulse ox unreliable with CO poisoning","Monitor for cardiac dysrhythmia","Request ALS intercept if altered LOC, cardiac symptoms, or pregnant","Rapid transport — hyperbaric O2 decision at hospital"],meds:["100% O2 via NRB"],equip:["NRB mask","Pulse oximeter (unreliable — note this)","BVM standby"],radio:"# [Hospital] Medic1 inbound — CO exposure. GCS [X] SpO2 [X]% on 100% O2. ETA [X]."},
+  fall_trauma:{steps:["C-spine precautions — manual stabilization on first contact","Primary survey: Airway → Breathing → Circulation → Disability → Expose","Control major bleeding — tourniquet, hemostatic gauze, direct pressure","Assess for head injury: GCS, pupils, mechanism","Apply C-collar, log roll to long board if spinal concern","O2 via NRB","Request ALS intercept for high-mechanism falls","Rapid transport — minimize scene time"],meds:["O2 via NRB"],equip:["C-collar","Long board","Trauma dressings","NRB mask"],radio:"# [Hospital] Medic1 inbound — fall trauma. GCS [X] BP [X/X]. Spinal precautions [yes/no]. ETA [X]."},
+  headache_severe:{steps:["BEFAST stroke screen — this may not be a simple headache","Blood glucose — rule out hypoglycemia","Vital signs: BP, HR, SpO2","Dim lighting if possible — reduce stimulation","Nothing by mouth — NPO","Do NOT give aspirin unless specifically ordered","Request ALS intercept if thunderclap onset, neuro deficits, or BP >180/120","Rapid transport — Code Stroke if deficits present"],meds:["O2 if SpO2 <95%"],equip:["Glucometer","BP cuff","Stethoscope"],radio:"# [Hospital] Medic1 inbound — severe headache. BEFAST [neg/pos findings]. BP [X/X]. ETA [X]."},
+  heat_stroke:{steps:["COOL AGGRESSIVELY — remove clothing, move to shade/AC","Ice packs to neck, axilla, and groin — highest blood flow areas","Cold water and fan if available","O2 via NRB","Vital signs — temp if possible","Monitor for seizure — be prepared","Request ALS intercept — these patients deteriorate rapidly","Rapid transport — stop cooling at approximately 102°F to avoid overshoot"],meds:["O2 via NRB"],equip:["Ice packs","NRB mask","Cooling supplies"],radio:"# [Hospital] Medic1 inbound — heat stroke. Temp [X] GCS [X]. Cooling initiated. ETA [X]."},
+  hypothermia:{steps:["Move to warm environment — remove wet clothing gently","Passive rewarming — warm blankets (not heating pads)","Handle extremely gently — rough movement can trigger VF in cold heart","O2 via NRB","Vital signs — pulse check up to 45 seconds (bradycardic)","Blood glucose — hypothermia and alcohol both cause hypoglycemia","Request ALS intercept — cardiac monitoring is critical","Transport — not dead until warm and dead"],meds:["O2 via NRB","Oral glucose if conscious and BG <60"],equip:["Warm blankets","NRB mask","Glucometer"],radio:"# [Hospital] Medic1 inbound — hypothermia. Temp [X] GCS [X] HR [X]. ETA [X]."},
+  obstetric:{steps:["Transport or deliver — crowning = deliver on scene","Crowning: support head (do NOT pull), check for nuchal cord","Normal delivery: guide shoulders, dry and stimulate infant immediately","Cord: clamp at 4 and 6 inches from infant, cut between clamps","Apgar at 1 and 5 minutes — document both scores","Keep mother and infant warm","Placenta delivers 5–30 min — do NOT pull cord","Request ALS intercept for any complications"],meds:["O2 via NRB if SpO2 <95%"],equip:["OB kit","Clamps","Sterile scissors","Bulb suction","Warm blankets"],radio:"# [Hospital] Medic1 inbound — OB [delivery complete/imminent]. Infant [crying/not crying]. Mother BP [X/X]. ETA [X]."},
+  psych:{steps:["Scene safety — do NOT approach without LEO if combative","Calm approach: introduce yourself, low voice, non-threatening posture","Rule out medical causes: blood glucose check, vital signs, SpO2","One question at a time — avoid rapid commands or ultimatums","Keep environment low-stimulation: fewer people, lower voices, step back","Document specific behaviors objectively — exact quotes if possible","Request ALS intercept if combative, medically unstable, or sedation needed","Transport to appropriate facility — note if WI 51.15 criteria met"],meds:["O2 if SpO2 <95%","Oral glucose if BG <60 and conscious"],equip:["Glucometer","BP cuff","NRB mask if needed"],radio:"# [Hospital] Medic1 inbound — behavioral emergency. [Cooperative/combative]. Medical cause [ruled out/evaluating]. LEO [on scene]. ETA [X]."},
+  stab:{steps:["Scene safety — confirm threat is neutralized before approach","Control bleeding — direct pressure, hemostatic gauze for wounds","Do NOT remove impaled objects — stabilize in place","Occlusive chest seal for any chest penetration (all four sides)","O2 via NRB","C-spine if mechanism includes neck or back wounds","Request ALS intercept — penetrating trauma = IV access critical","Load and go — scene time under 10 minutes"],meds:["O2 via NRB"],equip:["Hemostatic gauze","Trauma dressings","Chest seal x2","NRB mask","Tourniquet if limb involved"],radio:"# [Hospital] Medic1 inbound — stab wound [location]. Bleeding [controlled]. GCS [X]. ETA [X]."},
+  stimulant_od:{steps:["Scene safety — stimulant OD patients can be extremely violent","Do NOT restrain without LEO present","Cool environment — stimulants cause life-threatening hyperthermia","O2 via NRB","Vital signs — HR, BP, temp","Blood glucose — stimulants alter glucose metabolism","Request ALS intercept immediately — sedation is ALS scope","Transport — all stimulant OD patients need hospital evaluation"],meds:["O2 via NRB"],equip:["NRB mask","BP cuff","Glucometer","Cooling supplies"],radio:"# [Hospital] Medic1 inbound — stimulant OD. HR [X] BP [X/X] Temp [X]. Agitated [yes/no]. LEO [on scene]. ETA [X]."},
+  unknown_od:{steps:["Scene safety — unknown substance = unknown behavior risk","Assess airway — open, suction if gurgling","BVM if respiratory rate under 8 or apneic","Narcan 2mg IN if opioid pattern: pinpoint pupils, slow breathing","Blood glucose — rule out hypoglycemia","Recovery position once breathing","O2 via NRB","Request ALS intercept","Transport all OD patients regardless of initial response to Narcan"],meds:["Narcan 2mg IN if opioid pattern","O2 via NRB","Oral glucose if BG <60 and conscious"],equip:["BVM","Suction","NRB mask","Glucometer"],radio:"# [Hospital] Medic1 inbound — unknown OD. GCS [X] RR [X]. Narcan [given/not given]. ETA [X]."},
+  unresponsive:{steps:["Assess responsiveness — sternal rub or trapezius pinch","Open airway — head-tilt chin-lift or jaw thrust","Check for breathing — look, listen, feel 10 seconds","If no pulse — CPR immediately, attach AED","Blood glucose — check immediately if pulse present","Narcan 2mg IN if opioid pattern suspected","O2 — BVM if respirations inadequate, NRB if adequate","Recovery position if breathing adequately","Request ALS intercept","Transport"],meds:["Narcan 2mg IN if opioid suspected","O2 via BVM or NRB","Oral glucose only if regains consciousness"],equip:["BVM","AED","OPA","Suction","Glucometer","NRB mask"],radio:"# [Hospital] Medic1 inbound — unresponsive patient. GCS [X] RR [X] HR [X]. [Narcan given/CPR in progress]. ETA [X]."}
 };
 
 function runEmsTree() {
@@ -3853,7 +4184,7 @@ function runEmsTree() {
   }).join(' ');
 
   /* Build pin id and summary text for this specific result */
-  var pinId    = 'ems-dtree-' + complaint + (mod ? '--' + mod : '');
+  var pinId    = 'ems-dtree-' + complaint + (mod ? '-' + mod : '');
   var pinTitle = t.title + (mod ? ' + ' + (document.getElementById('ems-modifier').options[document.getElementById('ems-modifier').selectedIndex] || {text:''}).text : '');
   var pinBody  = t.priority + ' · ' + steps[0] + (steps[1] ? '; ' + steps[1] : '');
   var pins     = loadPins('ems');
@@ -4207,7 +4538,12 @@ function escAttr(s) {
 }
 
 /* ═══════════════════════════════════════════════
-   PIN SYSTEM
+   PIN SYSTEM v2 — Scene-card level + DT + Meds
+   Rules:
+   - Scene protocol cards: pin the whole card (not prows)
+   - Regular cards (meds, vitals, radio): pin the card
+   - Decision tree results: stored in metadata (no DOM element)
+   - Pin IDs are stable string keys stored in localStorage
 ═══════════════════════════════════════════════ */
 
 function loadPins(appId) {
@@ -4217,64 +4553,77 @@ function savePins(appId, pins) {
   LA.set('pins_'+appId, JSON.stringify(pins));
 }
 
-/* Inject pin buttons into every card and prow at startup */
+/* ── Inject 📌 buttons. Called once on DOMContentLoaded. ── */
 function injectPinButtons() {
   ['ems','leo'].forEach(function(appId) {
     var app = document.getElementById('app-'+appId);
     if (!app) return;
     var pins = loadPins(appId);
 
-    /* Cards — skip scene-cards (they use prow pins) and the DT wrapper card */
+    /* Scene cards — pin the whole card via the h3 heading */
+    app.querySelectorAll('.scene-card').forEach(function(card) {
+      if (card.querySelector('.pin-btn')) return; /* already injected */
+      var h3 = card.querySelector('h3');
+      if (!h3) return;
+      var sceneId = card.id; /* e.g. "ems-sc-mvc" */
+      var pid = 'scene-' + sceneId;
+      card.setAttribute('data-pin-id', pid);
+      var btn = _makePinBtn(pins.includes(pid), function(e) {
+        e.stopPropagation();
+        togglePin(appId, pid);
+      });
+      h3.style.display = 'flex';
+      h3.style.alignItems = 'center';
+      h3.style.justifyContent = 'space-between';
+      h3.style.gap = '6px';
+      h3.appendChild(btn);
+    });
+
+    /* Regular cards — med cards, vitals cards, radio cards, etc.
+       Skip scene-cards (handled above) and DT result wrapper */
     app.querySelectorAll('.card').forEach(function(card, i) {
       if (card.classList.contains('scene-card')) return;
       if (card.closest('#ems-iftt, #leo-leodtree')) return;
-      if (card.querySelector('.pin-btn')) return;
+      if (card.querySelector(':scope > h3 > .pin-btn, :scope > .pin-btn')) return;
       var heading = card.querySelector('h3, strong');
       if (!heading) return;
+      /* Skip if heading is inside a nested card */
+      if (heading.closest('.card') !== card) return;
       var pid = appId + '-card-' + i;
       card.setAttribute('data-pin-id', pid);
-      var btn = document.createElement('button');
-      btn.className = 'pin-btn' + (pins.includes(pid) ? ' pinned' : '');
-      btn.title = 'Pin this card';
-      btn.textContent = '📌';
-      btn.setAttribute('data-pin-id', pid);
-      btn.onclick = function(e){ e.stopPropagation(); togglePin(appId, pid); };
-      /* Append pin into the heading element itself — no layout override on the card */
+      var btn = _makePinBtn(pins.includes(pid), function(e) {
+        e.stopPropagation();
+        togglePin(appId, pid);
+      });
       heading.style.display = 'flex';
       heading.style.alignItems = 'center';
       heading.style.justifyContent = 'space-between';
       heading.style.gap = '6px';
       heading.appendChild(btn);
     });
-
-    /* Scene-card prow pins */
-    app.querySelectorAll('.scene-card .prow').forEach(function(row, i) {
-      if (row.querySelector('.pin-btn')) return;
-      var pid = appId + '-prow-' + i;
-      row.setAttribute('data-pin-id', pid);
-      var btn = document.createElement('button');
-      btn.className = 'pin-btn' + (pins.includes(pid) ? ' pinned' : '');
-      btn.title = 'Pin this step';
-      btn.textContent = '📌';
-      btn.setAttribute('data-pin-id', pid);
-      btn.onclick = function(e){ e.stopPropagation(); togglePin(appId, pid); };
-      row.appendChild(btn);
-    });
   });
+}
+
+function _makePinBtn(isPinned, onclickFn) {
+  var btn = document.createElement('button');
+  btn.className = 'pin-btn' + (isPinned ? ' pinned' : '');
+  btn.title = isPinned ? 'Unpin' : 'Pin';
+  btn.textContent = '📌';
+  btn.onclick = onclickFn;
+  return btn;
 }
 
 function togglePin(appId, pid) {
   var pins = loadPins(appId);
-  var idx  = pins.indexOf(pid);
-  if (idx === -1) { pins.push(pid); } else { pins.splice(idx,1); }
+  var idx = pins.indexOf(pid);
+  var adding = idx === -1;
+  if (adding) { pins.push(pid); } else { pins.splice(idx, 1); }
   savePins(appId, pins);
-
-  /* Update all pin buttons with this id */
-  document.querySelectorAll('[data-pin-id="'+pid+'"] .pin-btn, .pin-btn[data-pin-id="'+pid+'"]').forEach(function(b){
-    b.classList.toggle('pinned', pins.includes(pid));
+  /* Update every button for this pin id */
+  document.querySelectorAll('[data-pin-id="'+pid+'"] .pin-btn').forEach(function(b) {
+    b.classList.toggle('pinned', adding);
+    b.title = adding ? 'Unpin' : 'Pin';
   });
-
-  /* Refresh pinned tab if visible */
   renderPinnedTab(appId);
 }
 
@@ -4284,166 +4633,216 @@ function renderPinnedTab(appId) {
   var pins = loadPins(appId);
 
   if (!pins.length) {
-    listEl.innerHTML = '<div class="pinned-empty"><span>📌</span>No pinned items yet.<br>Hit the 📌 button on any card, protocol step, or decision tree result to pin it here.</div>';
+    listEl.innerHTML = '<div class="pinned-empty"><span>📌</span>No pinned items yet.<br>Tap 📌 on any card or decision tree result to pin it here.</div>';
     return;
   }
 
-  /* Load DT metadata for restoring pinned tree results */
   var dtMeta = {};
   try { dtMeta = JSON.parse(LA.get('dtree_'+appId) || '{}'); } catch(e) {}
 
-  var html = '';
+  var items = [];
   pins.forEach(function(pid) {
 
-    /* ── Decision tree pin — read from stored metadata ── */
+    /* Decision tree pin */
     if (pid.indexOf('-dtree-') !== -1) {
       var m = dtMeta[pid];
       if (!m) return;
-      html += '<div class="pin-item">'
-        + '<div class="pin-item-source">🔀 Decision Tree</div>'
-        + '<div class="pin-item-title">' + escHtml(m.title) + '</div>'
-        + (m.body ? '<div class="pin-item-body">' + escHtml(m.body) + '…</div>' : '')
-        + '<div class="pin-item-footer">'
-        + '<button class="pin-goto-btn" onclick="pinGotoDtree(\''+escAttr(m.complaint)+'\',\''+escAttr(m.mod||'')+'\')">→ Go to</button>'
-        + '<button class="pin-unpin-btn" onclick="toggleDtreePin(\''+pid+'\',\''+escAttr(m.complaint)+'\',\''+escAttr(m.mod||'')+'\','+JSON.stringify(m.title)+','+JSON.stringify(m.body)+')">Unpin</button>'
-        + '</div></div>';
+      items.push({
+        source: '🔀 Decision Tree',
+        title: m.title,
+        body: m.body || '',
+        gotoFn: function() { pinGotoDtree(m.complaint, m.mod || ''); },
+        unpinFn: function() { toggleDtreePin(pid, m.complaint, m.mod || '', m.title, m.body || ''); }
+      });
       return;
     }
 
-    var el = document.querySelector('[data-pin-id="'+pid+'"]');
-    if (!el) return;
-
-    var title = '', body = '', tabId = '', sourceLabel = '';
-
-    if (el.classList.contains('prow')) {
-      /* Scene protocol step — show "Protocol Name — Step Name" */
-      var stepStrong = el.querySelector('.ptxt strong');
-      var stepSpan   = el.querySelector('.ptxt span');
-      var stepName   = stepStrong ? stepStrong.textContent.trim() : '';
-      body = stepSpan ? stepSpan.textContent.trim().replace(/\s+/g,' ').substring(0,130) + '…' : '';
-      var sceneCard  = el.closest('.scene-card');
-      var sceneName  = sceneCard ? (sceneCard.querySelector('h3')||{textContent:''}).textContent.replace('📌','').trim() : '';
-      title = sceneName ? sceneName + ' — ' + stepName : stepName;
-      sourceLabel = 'Scene protocols' + (sceneName ? ' › ' + sceneName : '');
-      tabId = 'protocols';
-
-    } else if (el.classList.contains('card')) {
-      /* Regular card — med card, vitals card, etc. */
-      var heading = el.querySelector('h3, strong');
-      title = heading ? heading.textContent.replace('📌','').trim() : pid;
-      var bodyEl = el.querySelector('p, li');
-      body = bodyEl ? bodyEl.textContent.trim().replace(/\s+/g,' ').substring(0,130) + '…' : '';
-      tabId = closestTab(el, appId);
-      sourceLabel = tabLabel(tabId, appId);
-
-    } else if (el.classList.contains('code-row')) {
-      title = (el.querySelector('.code-num')||{}).textContent.trim() || pid;
-      body  = (el.querySelector('.code-meaning')||{}).textContent.trim() || '';
-      tabId = closestTab(el, appId);
-      sourceLabel = tabLabel(tabId, appId);
+    /* Scene card pin */
+    if (pid.indexOf('scene-') === 0) {
+      var sceneId = pid.slice(6); /* strip "scene-" */
+      var cardEl = document.getElementById(sceneId);
+      if (!cardEl) return;
+      var h3 = cardEl.querySelector('h3');
+      var title = h3 ? h3.textContent.replace('📌','').trim() : pid;
+      var firstProw = cardEl.querySelector('.prow .ptxt');
+      var body = '';
+      if (firstProw) {
+        var stepName = (firstProw.querySelector('strong') || {textContent:''}).textContent;
+        var stepBody = (firstProw.querySelector('span') || {textContent:''}).textContent.substring(0,90);
+        body = stepName + ' — ' + stepBody + '…';
+      }
+      var aId = sceneId.startsWith('ems') ? 'ems' : 'leo';
+      items.push({
+        source: '🩺 Scene Protocol',
+        title: title,
+        body: body,
+        gotoFn: function(sid) { return function() { pinGotoScene(sid); }; }(sceneId),
+        unpinFn: function(p, a) { return function() { togglePin(a, p); }; }(pid, aId)
+      });
+      return;
     }
 
-    if (!title) return;
-
-    html += '<div class="pin-item">'
-      + '<div class="pin-item-source">' + escHtml(sourceLabel) + '</div>'
-      + '<div class="pin-item-title">' + escHtml(title) + '</div>'
-      + (body ? '<div class="pin-item-body">' + escHtml(body) + '</div>' : '')
-      + '<div class="pin-item-footer">'
-      + '<button class="pin-goto-btn" onclick="pinGoto(\''+appId+'\',\''+pid+'\')">→ Go to</button>'
-      + '<button class="pin-unpin-btn" onclick="togglePin(\''+appId+'\',\''+pid+'\')">Unpin</button>'
-      + '</div></div>';
+    /* Regular card pin */
+    var el = document.querySelector('[data-pin-id="'+pid+'"]');
+    if (!el) return;
+    var heading = el.querySelector('h3, strong');
+    var title = heading ? heading.textContent.replace('📌','').trim() : pid;
+    var bodyEl = el.querySelector('p, li');
+    var body = bodyEl ? bodyEl.textContent.trim().replace(/\s+/g,' ').substring(0,130) + '…' : '';
+    var tabId = closestTab(el, appId);
+    var srcLabel = tabLabel(tabId, appId) || 'Reference';
+    items.push({
+      source: srcLabel,
+      title: title,
+      body: body,
+      gotoFn: function(a, p) { return function() { pinGoto(a, p); }; }(appId, pid),
+      unpinFn: function(a, p) { return function() { togglePin(a, p); }; }(appId, pid)
+    });
   });
 
-  listEl.innerHTML = html || '<div class="pinned-empty"><span>📌</span>No pinned items found.</div>';
+  if (!items.length) {
+    listEl.innerHTML = '<div class="pinned-empty"><span>📌</span>No pinned items found.</div>';
+    return;
+  }
+
+  /* Build DOM nodes directly — no innerHTML with onclick strings */
+  listEl.innerHTML = '';
+  items.forEach(function(item) {
+    var wrap = document.createElement('div');
+    wrap.className = 'pin-item';
+
+    var src = document.createElement('div');
+    src.className = 'pin-item-source';
+    src.textContent = item.source;
+
+    var ttl = document.createElement('div');
+    ttl.className = 'pin-item-title';
+    ttl.textContent = item.title;
+
+    var footer = document.createElement('div');
+    footer.className = 'pin-item-footer';
+
+    var gotoBtn = document.createElement('button');
+    gotoBtn.className = 'pin-goto-btn';
+    gotoBtn.textContent = '→ Go to';
+    gotoBtn.onclick = item.gotoFn;
+
+    var unpinBtn = document.createElement('button');
+    unpinBtn.className = 'pin-unpin-btn';
+    unpinBtn.textContent = 'Unpin';
+    unpinBtn.onclick = item.unpinFn;
+
+    footer.appendChild(gotoBtn);
+    footer.appendChild(unpinBtn);
+
+    wrap.appendChild(src);
+    wrap.appendChild(ttl);
+    if (item.body) {
+      var bd = document.createElement('div');
+      bd.className = 'pin-item-body';
+      bd.textContent = item.body;
+      wrap.appendChild(bd);
+    }
+    wrap.appendChild(footer);
+    listEl.appendChild(wrap);
+  });
+}
+
+function pinGotoScene(sceneCardId) {
+  /* sceneCardId = e.g. "ems-sc-mvc" */
+  var appId = sceneCardId.startsWith('ems') ? 'ems' : 'leo';
+  /* Navigate to protocols tab */
+  var tabBtn = document.querySelector('#'+appId+'-nav button[onclick*="\'protocols\'"]');
+  if (tabBtn) tabBtn.click();
+  /* Activate the right pill */
+  var sceneKey = sceneCardId.replace(appId+'-sc-','');
+  setTimeout(function() {
+    var pill = document.querySelector('#'+appId+'-protocols .spill[onclick*="\'' + sceneKey + '\'"]');
+    if (pill) {
+      if (appId === 'ems') emsScene(sceneKey, pill);
+      else leoScene(sceneKey, pill);
+    }
+    var card = document.getElementById(sceneCardId);
+    if (card) {
+      setTimeout(function() {
+        card.scrollIntoView({ behavior:'smooth', block:'start' });
+        card.style.outline = '3px solid #2563EB';
+        card.style.borderRadius = '12px';
+        setTimeout(function(){ card.style.outline = ''; }, 1800);
+      }, 80);
+    }
+  }, 120);
 }
 
 function pinGoto(appId, pid) {
   var el = document.querySelector('[data-pin-id="'+pid+'"]');
   if (!el) return;
   var tabId = closestTab(el, appId);
-
-  /* Navigate to tab */
   if (tabId) {
-    var tabBtn = document.querySelector('#'+appId+'-nav button[onclick*="\''+tabId+'\'"]');
-    if (tabBtn) tabBtn.click();
+    var navBtn = document.querySelector('#'+appId+'-nav button[onclick*="\'' + tabId + '\'"]');
+    if (navBtn) navBtn.click();
   }
-
-  /* If inside a scene-card, activate the correct scene pill */
-  var sceneCard = el.closest ? el.closest('.scene-card') : null;
-  if (sceneCard) {
-    var sceneId  = sceneCard.id.replace(appId+'-sc-','');
-    var sceneBtn = document.querySelector('#'+appId+'-protocols .spill[onclick*="\''+sceneId+'\'"]');
-    if (sceneBtn) setTimeout(function(){ emsScene(sceneId, sceneBtn); }, 60);
-  }
-
-  setTimeout(function(){
+  setTimeout(function() {
     el.scrollIntoView({ behavior:'smooth', block:'center' });
     el.style.outline = '3px solid #2563EB';
     el.style.borderRadius = '6px';
-    setTimeout(function(){ el.style.outline=''; }, 1800);
+    setTimeout(function(){ el.style.outline = ''; }, 1800);
   }, 140);
 }
 
 function pinGotoDtree(complaint, mod) {
-  /* Navigate to the Decision Tree tab */
   var dtBtn = document.querySelector('#ems-nav button[onclick*="\'iftt\'"]');
   if (dtBtn) dtBtn.click();
-
-  setTimeout(function(){
+  setTimeout(function() {
     var cSelect = document.getElementById('ems-complaint');
-    if (cSelect) {
-      cSelect.value = complaint;
-      if (typeof updateModifiers === 'function') updateModifiers();
-    }
+    if (cSelect) { cSelect.value = complaint; if (typeof updateModifiers === 'function') updateModifiers(); }
     var mSelect = document.getElementById('ems-modifier');
     if (mSelect && mod) mSelect.value = mod;
     runEmsTree();
-    setTimeout(function(){
+    setTimeout(function() {
       var res = document.getElementById('ems-tree-result');
       if (res) res.scrollIntoView({ behavior:'smooth', block:'start' });
     }, 80);
   }, 120);
 }
 
-/* ── Decision-tree specific pin (stores complaint/mod for restoration) ── */
+/* ── DT-specific pin — stores metadata because the result div is ephemeral ── */
 function toggleDtreePin(pid, complaint, mod, title, body) {
   var pins = loadPins('ems');
-  var idx  = pins.indexOf(pid);
-  if (idx === -1) { pins.push(pid); } else { pins.splice(idx,1); }
+  var idx = pins.indexOf(pid);
+  var adding = idx === -1;
+  if (adding) { pins.push(pid); } else { pins.splice(idx, 1); }
   savePins('ems', pins);
 
-  /* Persist metadata so we can restore even after result is cleared */
   var meta = {};
   try { meta = JSON.parse(LA.get('dtree_ems') || '{}'); } catch(e) {}
-  if (pins.includes(pid)) {
+  if (adding) {
     meta[pid] = { complaint: complaint, mod: mod, title: title, body: body };
   } else {
     delete meta[pid];
   }
   LA.set('dtree_ems', JSON.stringify(meta));
 
-  /* Update the pin button in the current result */
-  document.querySelectorAll('.dtree-pin-btn').forEach(function(b){
-    b.classList.toggle('pinned', pins.includes(pid));
+  document.querySelectorAll('.dtree-pin-btn').forEach(function(b) {
+    b.classList.toggle('pinned', adding);
+    b.title = adding ? 'Unpin' : 'Pin this result';
   });
 
   renderPinnedTab('ems');
 }
 
-/* Render pinned tab on show */
+/* ── Wire pinned-tab rendering on tab open ── */
 var _origEmsTab = emsTab;
 emsTab = function(id, btn) {
   _origEmsTab(id, btn);
   if (id === 'pinned') renderPinnedTab('ems');
+  if (id === 'timers') { tqRender(); }
   if (id === 'reports') {
-    /* Auto-fill callsign from Unit Status Board if unit field is empty */
     var rwUnit = document.getElementById('rw-unit');
     if (rwUnit && !rwUnit.value.trim()) {
       var usbCs = (document.getElementById('usb-callsign').value || '').trim();
       if (usbCs) rwUnit.value = usbCs;
     }
-    /* Always set hospital to FMMC */
     var rwHosp = document.getElementById('rw-hospital');
     if (rwHosp) rwHosp.value = 'FMMC';
   }
@@ -4454,11 +4853,8 @@ leoTab = function(id, btn) {
   if (id === 'pinned') renderPinnedTab('leo');
 };
 
-/* Init on DOM ready */
-document.addEventListener('DOMContentLoaded', function() {
-  injectPinButtons();
-});
-/* Fallback if DOMContentLoaded already fired */
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', function() { injectPinButtons(); });
 if (document.readyState !== 'loading') { injectPinButtons(); }
 
 function toggleDark() {
@@ -4476,6 +4872,7 @@ function enterApp(mode) {
   var taw = document.getElementById('tb-als-wrap');
   if(taw) taw.style.display = mode==='ems' ? 'inline-flex' : 'none';
   switchMode(mode);
+  showNotepadFab();
   /* Sync toggle button visual states to restored persisted values */
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   document.querySelectorAll('.dm-toggle').forEach(function(b){ b.classList.toggle('on', isDark); });
@@ -4709,11 +5106,487 @@ function rwCopy(elId, btn) {
 }
 
 /* ═══════════════════════════════════════════════
-   VERSION TRACKING
+   SBAR / RADIO COPY FUNCTIONS
 ═══════════════════════════════════════════════ */
-var LARPAID_VERSION = '1.5.0';
+function sbarCopyPanel(panelId, btn) {
+  var el = document.getElementById(panelId);
+  if (!el) return;
+  var textEl = el.querySelector('.sbar-text');
+  var text = textEl ? textEl.textContent.trim() : el.textContent.trim();
+  _copyText(text, btn, 'Copy', 'Copied!');
+}
+
+function sbarCopyAll(btn) {
+  var panels = ['sbar-situation','sbar-background','sbar-assessment','sbar-recommendation'];
+  var lines = [];
+  panels.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var label = (el.querySelector('[style*="uppercase"]') || {}).textContent || '';
+    var textEl = el.querySelector('.sbar-text');
+    var text = textEl ? textEl.textContent.trim() : '';
+    if (label) lines.push('[' + label.replace('SBAR — ', '') + '] ' + text);
+  });
+  _copyText(lines.join('\n\n'), btn, '📋 Copy full SBAR', '✓ Copied!');
+}
+
+function radioCopyCard(btn) {
+  var card = btn.closest ? btn.closest('.card') : null;
+  if (!card) return;
+  var items = card.querySelectorAll('li em');
+  var lines = [];
+  items.forEach(function(em){ lines.push(em.textContent.trim()); });
+  _copyText(lines.join('\n'), btn, 'Copy', 'Copied!');
+}
+
+function _copyText(text, btn, origLabel, doneLabel) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function(){
+      if (btn) { btn.textContent = doneLabel; setTimeout(function(){ btn.textContent = origLabel; }, 1600); }
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (btn) { btn.textContent = doneLabel; setTimeout(function(){ btn.textContent = origLabel; }, 1600); }
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   POP-OUT NOTEPAD
+═══════════════════════════════════════════════ */
+var _notepadReady = false;
+function initNotepad() {
+  if (_notepadReady) return;
+  _notepadReady = true;
+    /* Floating button */
+    var fab = document.createElement('button');
+    fab.id = 'notepad-fab';
+    fab.title = 'Open notepad';
+    fab.innerHTML = '📝';
+    fab.setAttribute('aria-label', 'Open notepad');
+    fab.style.cssText = [
+      'position:fixed',
+      'right:18px',
+      'bottom:70px',
+      'z-index:8000',
+      'width:46px',
+      'height:46px',
+      'border-radius:50%',
+      'border:1.5px solid var(--color-border-2)',
+      'background:var(--color-bg-raised)',
+      'color:var(--color-text)',
+      'font-size:20px',
+      'cursor:pointer',
+      'display:none',
+      'align-items:center',
+      'justify-content:center',
+      'box-shadow:0 4px 16px rgba(0,0,0,.18)',
+      'transition:all .18s',
+      'line-height:1',
+    ].join(';');
+    document.body.appendChild(fab);
+
+    /* Notepad window */
+    var notepad = document.createElement('div');
+    notepad.id = 'notepad-win';
+    notepad.style.cssText = [
+      'position:fixed',
+      'right:18px',
+      'bottom:125px',
+      'z-index:8001',
+      'width:320px',
+      'height:340px',
+      'min-width:220px',
+      'min-height:160px',
+      'background:var(--color-bg-raised)',
+      'border:1.5px solid var(--color-border-2)',
+      'border-radius:12px',
+      'box-shadow:0 8px 32px rgba(0,0,0,.22)',
+      'display:none',
+      'flex-direction:column',
+      'overflow:hidden',
+      'resize:both',
+      'font-family:var(--font-sans)',
+    ].join(';');
+
+    notepad.innerHTML = [
+      '<div id="notepad-header" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--color-bg-secondary);border-bottom:1px solid var(--color-border);cursor:move;user-select:none;flex-shrink:0;">',
+        '<span style="font-size:12px;font-weight:700;color:var(--color-text-2);letter-spacing:.03em;">NOTEPAD</span>',
+        '<div style="display:flex;gap:6px;">',
+          '<button onclick="notepadClear()" title="Clear" style="font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;font-family:var(--font-sans);">Clear</button>',
+          '<button onclick="notepadClose()" style="font-size:15px;background:none;border:none;cursor:pointer;color:var(--color-text-3);line-height:1;padding:0 2px;" title="Close">✕</button>',
+        '</div>',
+      '</div>',
+      '<textarea id="notepad-ta" placeholder="Type notes here…" style="flex:1;width:100%;border:none;outline:none;resize:none;padding:10px 12px;font-size:13px;line-height:1.6;background:var(--color-bg-raised);color:var(--color-text);font-family:var(--font-sans);box-sizing:border-box;" oninput="notepadSave()"></textarea>',
+    ].join('');
+    document.body.appendChild(notepad);
+
+    /* Button starts hidden; shown by enterApp() calling showNotepadFab() */
+    fab.style.display = 'none';
+
+    fab.onclick = function() { toggleNotepad(); };
+
+    /* Restore saved notes */
+    var saved = LA.get('notepad_text');
+    if (saved) { var ta = document.getElementById('notepad-ta'); if(ta) ta.value = saved; }
+
+    /* Drag to move */
+    var hdr = document.getElementById('notepad-header');
+    var dragging = false, ox = 0, oy = 0, startRight = 0, startBottom = 0;
+    hdr.addEventListener('mousedown', function(e) {
+      dragging = true;
+      var rect = notepad.getBoundingClientRect();
+      ox = e.clientX; oy = e.clientY;
+      startRight  = window.innerWidth  - rect.right;
+      startBottom = window.innerHeight - rect.bottom;
+      notepad.style.resize = 'none'; /* pause resize during drag */
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      var dx = e.clientX - ox, dy = e.clientY - oy;
+      notepad.style.right  = Math.max(4, startRight  - dx) + 'px';
+      notepad.style.bottom = Math.max(4, startBottom - dy) + 'px';
+    });
+    document.addEventListener('mouseup', function() {
+      dragging = false;
+      notepad.style.resize = 'both';
+    });
+}
+
+
+
+function showNotepadFab() {
+  /* Called by enterApp() — show the FAB and ensure notepad is initialised */
+  initNotepad();
+  var fab = document.getElementById('notepad-fab');
+  if (fab) fab.style.display = 'flex';
+}
+function toggleNotepad() {
+  var win = document.getElementById('notepad-win');
+  if (!win) return;
+  var open = win.style.display === 'flex';
+  win.style.display = open ? 'none' : 'flex';
+  var fab = document.getElementById('notepad-fab');
+  if (fab) fab.innerHTML = open ? '📝' : '✕';
+}
+function notepadClose() {
+  var win = document.getElementById('notepad-win');
+  if (win) win.style.display = 'none';
+  var fab = document.getElementById('notepad-fab');
+  if (fab) fab.innerHTML = '📝';
+}
+function notepadClear() {
+  var ta = document.getElementById('notepad-ta');
+  if (!ta) return;
+  if (ta.value === '') return;
+  ta.value = '';
+  LA.set('notepad_text','');
+}
+function notepadSave() {
+  var ta = document.getElementById('notepad-ta');
+  if (ta) LA.set('notepad_text', ta.value);
+}
+
+/* ═══════════════════════════════════════════════
+   SCENE & CPR TIMERS
+═══════════════════════════════════════════════ */
+/* ── Scene timer ── */
+var _sceneStart = null, _sceneElapsed = 0, _sceneRunning = false, _sceneInterval = null;
+function sceneFmt(ms) { var s=Math.floor(ms/1000),m=Math.floor(s/60); return (m<10?'0':'')+m+':'+(s%60<10?'0':'')+(s%60); }
+function sceneTimerStart() {
+  if (_sceneRunning) return;
+  _sceneRunning = true;
+  _sceneStart = Date.now() - _sceneElapsed;
+  _sceneInterval = setInterval(function() {
+    _sceneElapsed = Date.now() - _sceneStart;
+    var d = document.getElementById('scene-timer-display');
+    var w = document.getElementById('scene-timer-warn');
+    if (d) { d.textContent = sceneFmt(_sceneElapsed); d.style.color = _sceneElapsed >= 600000 ? '#DC2626' : 'var(--color-text)'; }
+    if (w) w.style.display = _sceneElapsed >= 600000 ? 'block' : 'none';
+  }, 250);
+}
+function sceneTimerStop() { if (!_sceneRunning) return; _sceneRunning = false; clearInterval(_sceneInterval); }
+function sceneTimerReset() {
+  sceneTimerStop(); _sceneElapsed = 0;
+  var d = document.getElementById('scene-timer-display'); if (d) { d.textContent = '00:00'; d.style.color = 'var(--color-text)'; }
+  var w = document.getElementById('scene-timer-warn'); if (w) w.style.display = 'none';
+}
+
+/* ── CPR cycle timer (2-min countdown) ── */
+var _cprCycle = 1, _cprRunning = false, _cprInterval = null, _cprCycleStart = null, _cprPausedMs = 120000;
+function cprFmt(ms) { var s=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(s/60); return (m<10?'0':'')+m+':'+(s%60<10?'0':'')+(s%60); }
+function cprTimerStart() {
+  if (_cprRunning) return;
+  _cprRunning = true;
+  _cprCycleStart = Date.now() - (120000 - _cprPausedMs);
+  _cprInterval = setInterval(function() {
+    var rem = 120000 - (Date.now() - _cprCycleStart);
+    var d = document.getElementById('cpr-timer-display');
+    var a = document.getElementById('cpr-switch-alert');
+    if (rem <= 0) {
+      clearInterval(_cprInterval); _cprRunning = false;
+      _cprCycle++; _cprPausedMs = 120000; _cprCycleStart = null;
+      if (d) { d.textContent = '00:00'; d.style.color = '#DC2626'; }
+      if (a) a.style.display = 'block';
+      var cc = document.getElementById('cpr-cycle-count'); if (cc) cc.textContent = _cprCycle;
+    } else {
+      _cprPausedMs = rem;
+      if (d) { d.textContent = cprFmt(rem); d.style.color = rem < 15000 ? '#DC2626' : 'var(--color-text)'; }
+      if (a) a.style.display = 'none';
+    }
+  }, 250);
+}
+function cprTimerStop() {
+  if (!_cprRunning) return;
+  _cprRunning = false;
+  clearInterval(_cprInterval);
+  /* _cprPausedMs already updated each tick */
+}
+function cprTimerReset() {
+  cprTimerStop(); _cprCycle = 1; _cprPausedMs = 120000; _cprCycleStart = null;
+  var d = document.getElementById('cpr-timer-display'); if (d) { d.textContent = '02:00'; d.style.color = 'var(--color-text)'; }
+  var a = document.getElementById('cpr-switch-alert'); if (a) a.style.display = 'none';
+  var cc = document.getElementById('cpr-cycle-count'); if (cc) cc.textContent = 1;
+}
+
+/* ── Epi timer (counts up, alert at 3 min) ── */
+var _epiStart = null, _epiRunning = false, _epiDoses = 0, _epiInterval = null;
+function epiDoseGiven() {
+  _epiDoses++;
+  var dc = document.getElementById('epi-dose-count'); if (dc) dc.textContent = _epiDoses;
+  _epiStart = Date.now();
+  if (!_epiRunning) {
+    _epiRunning = true;
+    _epiInterval = setInterval(function() {
+      if (!_epiStart) return;
+      var el = Date.now() - _epiStart;
+      var d = document.getElementById('epi-timer-display');
+      var a = document.getElementById('epi-due-alert');
+      if (d) { d.textContent = sceneFmt(el); d.style.color = el >= 180000 ? '#DC2626' : 'var(--color-text)'; }
+      if (a) a.style.display = el >= 180000 ? 'block' : 'none';
+    }, 250);
+  }
+  var a2 = document.getElementById('epi-due-alert'); if (a2) a2.style.display = 'none';
+}
+function epiTimerReset() {
+  clearInterval(_epiInterval); _epiRunning = false; _epiStart = null; _epiDoses = 0;
+  var d = document.getElementById('epi-timer-display'); if (d) { d.textContent = '00:00'; d.style.color = 'var(--color-text)'; }
+  var a = document.getElementById('epi-due-alert'); if (a) a.style.display = 'none';
+  var dc = document.getElementById('epi-dose-count'); if (dc) dc.textContent = 0;
+}
+
+/* ── Tourniquet log ── */
+var _tqList = [];
+function tqAdd() {
+  var sel = document.getElementById('tq-limb');
+  var limb = sel ? sel.value : '';
+  if (!limb) { sel.style.borderColor = '#DC2626'; setTimeout(function(){ sel.style.borderColor=''; }, 1500); return; }
+  var now = new Date();
+  var timeStr = (now.getHours()<10?'0':'')+now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes()+':'+(now.getSeconds()<10?'0':'')+now.getSeconds();
+  _tqList.push({ limb: limb, time: timeStr, applied: Date.now() });
+  sel.value = '';
+  tqRender();
+}
+function tqRender() {
+  var el = document.getElementById('tq-list');
+  if (!el) return;
+  if (!_tqList.length) { el.innerHTML = '<p style="font-size:12px;color:var(--color-text-3);text-align:center;padding:6px 0;">No tourniquets logged</p>'; return; }
+  el.innerHTML = _tqList.map(function(t, i) {
+    var age = Math.floor((Date.now() - t.applied) / 60000);
+    var warn = age >= 90;
+    var crit = age >= 120;
+    var col = crit ? '#DC2626' : warn ? '#D97706' : 'var(--color-text)';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;background:var(--color-bg-secondary);border:1px solid var(--color-border);margin-bottom:6px;">'
+      + '<span style="font-size:12.5px;font-weight:700;color:'+col+';">🩹 '+t.limb+'</span>'
+      + '<span style="font-size:12px;color:'+col+';">Applied '+t.time+(crit ? ' ⚠️ 2hr+' : warn ? ' ⚠️ 90min+' : ' ('+age+'min)')+'</span>'
+      + '<button onclick="_tqList.splice('+i+',1);tqRender();" style="font-size:11px;padding:2px 7px;border-radius:6px;border:1px solid var(--color-border-2);background:transparent;color:var(--color-text-3);cursor:pointer;">✕</button>'
+      + '</div>';
+  }).join('');
+}
+
+function timersResetAll() {
+  sceneTimerReset(); cprTimerReset(); epiTimerReset();
+  _tqList = []; tqRender();
+}
+
+/* ═══════════════════════════════════════════════
+   MCI TOGGLE — FULL ALERT MODE
+═══════════════════════════════════════════════ */
+var _mciActive = false;
+var _mciFlashInterval = null;
+
+function toggleMCI() {
+  _mciActive = !_mciActive;
+  var btn = document.getElementById('mci-toggle-btn');
+
+  if (_mciActive) {
+    /* Activate MCI mode */
+    document.body.setAttribute('data-mci','active');
+    if (btn) { btn.textContent = '🔴 DEACTIVATE MCI'; btn.style.background = '#991B1B'; btn.style.color = '#fff'; btn.style.borderColor = '#991B1B'; }
+    /* Flash the topbar red */
+    var tb = document.getElementById('topbar');
+    _mciFlashInterval = setInterval(function() {
+      if (!_mciActive) { clearInterval(_mciFlashInterval); return; }
+      tb.style.background = tb.style.background === 'rgba(220,38,38,0.18)' ? 'transparent' : 'rgba(220,38,38,0.18)';
+    }, 600);
+    /* Show MCI panel */
+    var panel = document.getElementById('mci-alert-panel');
+    if (panel) panel.style.display = 'block';
+  } else {
+    /* Deactivate */
+    document.body.removeAttribute('data-mci');
+    clearInterval(_mciFlashInterval);
+    var tb = document.getElementById('topbar');
+    tb.style.background = '';
+    if (btn) { btn.textContent = '🚨 ACTIVATE MCI'; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; }
+    var panel = document.getElementById('mci-alert-panel');
+    if (panel) panel.style.display = 'none';
+  }
+}
+
+/* MCI triage tag counter */
+var _mciCounts = {red:0, yellow:0, green:0, black:0};
+function mciAddTag(color) {
+  _mciCounts[color]++;
+  mciRenderCounts();
+}
+function mciRemoveTag(color) {
+  if (_mciCounts[color] > 0) { _mciCounts[color]--; mciRenderCounts(); }
+}
+function mciRenderCounts() {
+  ['red','yellow','green','black'].forEach(function(c) {
+    var el = document.getElementById('mci-count-'+c);
+    if (el) el.textContent = _mciCounts[c];
+  });
+  var total = _mciCounts.red + _mciCounts.yellow + _mciCounts.green + _mciCounts.black;
+  var tel = document.getElementById('mci-total');
+  if (tel) tel.textContent = total;
+}
+function mciResetCounts() {
+  _mciCounts = {red:0, yellow:0, green:0, black:0};
+  mciRenderCounts();
+  var brief = document.getElementById('mci-briefing-ta');
+  if (brief) brief.value = '';
+}
+
+
+/* ═══════════════════════════════════════════════
+   STATUTE SEARCH
+═══════════════════════════════════════════════ */
+function filterStatutes(q) {
+  var q2 = q.toLowerCase().trim();
+  var rows = document.querySelectorAll('#leo-statutes .codes-table tbody tr');
+  var anyVisible = false;
+  rows.forEach(function(r) {
+    var txt = r.textContent.toLowerCase();
+    var show = !q2 || txt.indexOf(q2) !== -1;
+    r.style.display = show ? '' : 'none';
+    if (show) anyVisible = true;
+  });
+  var nr = document.getElementById('statute-no-results');
+  if (nr) nr.style.display = anyVisible ? 'none' : 'block';
+}
+
+/* ═══════════════════════════════════════════════
+   LEO INCIDENT REPORT WRITER
+═══════════════════════════════════════════════ */
+function leoGenReport() {
+  function lrv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  var unit     = lrv('lr-unit')     || '[Unit]';
+  var type     = lrv('lr-type')     || 'Incident / Arrest';
+  var dt       = lrv('lr-datetime') || '[Date/Time]';
+  var loc      = lrv('lr-location') || '[Location]';
+  var subname  = lrv('lr-subname')  || '[Subject Name]';
+  var subdob   = lrv('lr-subdob')   || '[DOB/Age/Sex]';
+  var subdesc  = lrv('lr-subdesc')  || '[Description]';
+  var vehicle  = lrv('lr-vehicle');
+  var reason   = lrv('lr-reason')   || '[Reason for contact]';
+  var charges  = lrv('lr-charges');
+  var narrative= lrv('lr-narrative')|| '[Narrative not entered]';
+  var stmts    = lrv('lr-statements');
+  var evidence = lrv('lr-evidence');
+  var disp     = lrv('lr-disposition') || '[Disposition]';
+  var witnesses= lrv('lr-witnesses');
+  var others   = lrv('lr-otherunits');
+  var notes    = lrv('lr-notes');
+
+  var lines = [];
+  lines.push('════════════════════════════════════════════');
+  lines.push('  OUTAGAMIE COUNTY SHERIFF\'S OFFICE');
+  lines.push('  ' + type.toUpperCase() + ' REPORT');
+  lines.push('════════════════════════════════════════════');
+  lines.push('Unit: ' + unit + '   Date/Time: ' + dt);
+  lines.push('Location: ' + loc);
+  lines.push('');
+  lines.push('── SUBJECT ─────────────────────────────────');
+  lines.push('Name: ' + subname);
+  lines.push('DOB / Age / Sex: ' + subdob);
+  lines.push('Description: ' + subdesc);
+  if (vehicle) lines.push('Vehicle: ' + vehicle);
+  lines.push('');
+  lines.push('── REASON FOR CONTACT ──────────────────────');
+  lines.push(reason);
+  if (charges) { lines.push(''); lines.push('Charges / Violations: ' + charges); }
+  lines.push('');
+  lines.push('── NARRATIVE ───────────────────────────────');
+  lines.push(narrative);
+  if (stmts) { lines.push(''); lines.push('Subject Statements:'); lines.push(stmts); }
+  if (evidence) { lines.push(''); lines.push('Evidence / Contraband: ' + evidence); }
+  lines.push('');
+  lines.push('── DISPOSITION ─────────────────────────────');
+  lines.push(disp);
+  if (witnesses) lines.push('Witnesses: ' + witnesses);
+  if (others)    lines.push('Other units: ' + others);
+  if (notes)     lines.push('Notes: ' + notes);
+  lines.push('');
+  lines.push('Reporting officer: ' + unit);
+  lines.push('════════════════════════════════════════════');
+
+  var out = document.getElementById('lr-output');
+  if (out) out.value = lines.join('\n');
+  var wrap = document.getElementById('lr-output-wrap');
+  if (wrap) wrap.style.display = 'block';
+}
+
+function leoReportCopy() {
+  var out = document.getElementById('lr-output');
+  if (!out) return;
+  out.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  var btn = document.querySelector('[onclick="leoReportCopy()"]');
+  if (btn) { var orig = btn.textContent; btn.textContent = '✓ Copied'; setTimeout(function(){ btn.textContent = orig; }, 1500); }
+}
+
+function leoReportClear() {
+  ['lr-unit','lr-datetime','lr-location','lr-subname','lr-subdob','lr-subdesc','lr-vehicle','lr-reason','lr-charges','lr-narrative','lr-statements','lr-evidence','lr-witnesses','lr-otherunits','lr-notes'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var out = document.getElementById('lr-output'); if (out) out.value = '';
+  var wrap = document.getElementById('lr-output-wrap'); if (wrap) wrap.style.display = 'none';
+}
+
+var LARPAID_VERSION = '1.6.0';
 
 var CHANGELOG = [
+  {
+    ver:   '1.6.0',
+    date:  'June 2026',
+    tags:  ['new','improved','fix'],
+    notes: [
+      { type:'new', text:'MCI Alert Mode — MCI scene card now has an activate button that shows a full-screen banner and live Red/Yellow/Green/Black triage counter.' },
+      { type:'new', text:'Pop-out Notepad — draggable 📝 notepad that persists between sessions and respects dark mode.' },
+      { type:'new', text:'⏱️ Timers tab — scene timer (10-min warning), 2-min CPR cycle countdown, epi dose timer (3-min alert), and tourniquet log.' },
+      { type:'new', text:'LEO Report Writer — new tab for Incident, Traffic Stop, Use of Force, DV, and Welfare Check reports with one-click copy.' },
+      { type:'new', text:'LEO RP Scripts — added Welfare Check, DV Response, and Shots Fired / Active Shooter cards.' },
+      { type:'new', text:'Statute search — live filter by statute number or offense name.' },
+      { type:'improved', text:'Triage calculator — now shows condition-specific protocols and radio scripts after assessment, plus input validation for out-of-range vitals.' },
+      { type:'fix', text:'CPR cycle timer — fixed interval drift across multiple cycles.' },
+      { type:'fix', text:'Pin bugs — double-dash in DT pin IDs fixed; search index now clears on re-inject.' },
+    ]
+  },
   {
     ver:   '1.5.0',
     date:  'June 2026',
@@ -4924,12 +5797,82 @@ setInterval(checkForUpdates, 30 * 60 * 1000);
 
 </div><!-- /main-container -->
 
+
+<!-- ══ MCI ALERT PANEL ══ -->
+<div id="mci-alert-panel" style="display:none;position:fixed;top:0;left:0;right:0;z-index:7500;pointer-events:none;">
+  <!-- Red flashing alert banner at very top -->
+  <div id="mci-banner" style="background:#DC2626;color:#fff;text-align:center;font-size:13px;font-weight:800;letter-spacing:.08em;padding:6px 12px;display:flex;align-items:center;justify-content:center;gap:12px;animation:mci-pulse 1.2s ease-in-out infinite;pointer-events:auto;">
+    <span style="font-size:16px;">🚨</span>
+    <span>MCI ACTIVE — MASS CASUALTY INCIDENT</span>
+    <span style="font-size:16px;">🚨</span>
+  </div>
+  <!-- Triage tag board (draggable would be nice but fixed right side is fine) -->
+  <div id="mci-tagboard" style="position:fixed;right:16px;top:68px;width:230px;background:var(--color-bg-raised);border:2px solid #DC2626;border-radius:12px;box-shadow:0 8px 32px rgba(220,38,38,.25);overflow:hidden;pointer-events:auto;">
+    <div style="background:#DC2626;color:#fff;padding:7px 12px;font-size:11px;font-weight:800;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;">
+      <span>TRIAGE BOARD</span>
+      <span id="mci-total" style="font-size:14px;font-weight:900;">0</span>
+    </div>
+    <!-- Red -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid var(--color-border);background:#FEF2F2;">
+      <span style="font-size:12px;font-weight:700;color:#991B1B;">🔴 Immediate (Red)</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button onclick="mciRemoveTag('red')" style="width:22px;height:22px;border-radius:50%;border:1px solid #FECACA;background:#fff;cursor:pointer;font-size:14px;line-height:1;color:#991B1B;font-weight:700;">−</button>
+        <span id="mci-count-red" style="font-size:16px;font-weight:900;color:#991B1B;min-width:20px;text-align:center;">0</span>
+        <button onclick="mciAddTag('red')" style="width:22px;height:22px;border-radius:50%;border:1px solid #FECACA;background:#DC2626;cursor:pointer;font-size:14px;line-height:1;color:#fff;font-weight:700;">+</button>
+      </div>
+    </div>
+    <!-- Yellow -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid var(--color-border);background:#FFFBEB;">
+      <span style="font-size:12px;font-weight:700;color:#92400E;">🟡 Delayed (Yellow)</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button onclick="mciRemoveTag('yellow')" style="width:22px;height:22px;border-radius:50%;border:1px solid #FDE68A;background:#fff;cursor:pointer;font-size:14px;line-height:1;color:#92400E;font-weight:700;">−</button>
+        <span id="mci-count-yellow" style="font-size:16px;font-weight:900;color:#92400E;min-width:20px;text-align:center;">0</span>
+        <button onclick="mciAddTag('yellow')" style="width:22px;height:22px;border-radius:50%;border:1px solid #FDE68A;background:#D97706;cursor:pointer;font-size:14px;line-height:1;color:#fff;font-weight:700;">+</button>
+      </div>
+    </div>
+    <!-- Green -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid var(--color-border);background:#F0FDF4;">
+      <span style="font-size:12px;font-weight:700;color:#065F46;">🟢 Minor (Green)</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button onclick="mciRemoveTag('green')" style="width:22px;height:22px;border-radius:50%;border:1px solid #BBF7D0;background:#fff;cursor:pointer;font-size:14px;line-height:1;color:#065F46;font-weight:700;">−</button>
+        <span id="mci-count-green" style="font-size:16px;font-weight:900;color:#065F46;min-width:20px;text-align:center;">0</span>
+        <button onclick="mciAddTag('green')" style="width:22px;height:22px;border-radius:50%;border:1px solid #BBF7D0;background:#16A34A;cursor:pointer;font-size:14px;line-height:1;color:#fff;font-weight:700;">+</button>
+      </div>
+    </div>
+    <!-- Black -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid var(--color-border);">
+      <span style="font-size:12px;font-weight:700;color:var(--color-text);">⬛ Expectant (Black)</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button onclick="mciRemoveTag('black')" style="width:22px;height:22px;border-radius:50%;border:1px solid #94A3B8;background:var(--color-bg-secondary);cursor:pointer;font-size:14px;line-height:1;color:var(--color-text);font-weight:700;">−</button>
+        <span id="mci-count-black" style="font-size:16px;font-weight:900;color:var(--color-text);min-width:20px;text-align:center;">0</span>
+        <button onclick="mciAddTag('black')" style="width:22px;height:22px;border-radius:50%;border:1px solid #94A3B8;background:#334155;cursor:pointer;font-size:14px;line-height:1;color:#fff;font-weight:700;">+</button>
+      </div>
+    </div>
+    <!-- Scene briefing -->
+    <div style="padding:8px 12px;">
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748B;margin:0 0 5px;">Scene briefing</p>
+      <textarea id="mci-briefing-ta" placeholder="Location, hazards, resources requested…" style="width:100%;height:72px;font-size:11.5px;border:1px solid var(--color-border-2);border-radius:6px;padding:6px 8px;resize:vertical;background:var(--color-bg);color:var(--color-text);font-family:var(--font-sans);box-sizing:border-box;"></textarea>
+      <button onclick="mciResetCounts()" style="margin-top:4px;font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid #FECACA;background:transparent;color:#991B1B;cursor:pointer;font-family:var(--font-sans);">Reset all</button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── MCI global flashing state ── */
+@keyframes mci-pulse { 0%,100%{opacity:1;} 50%{opacity:.7;} }
+[data-mci="active"] #topbar { outline: 3px solid #DC2626; outline-offset: -2px; }
+[data-mci="active"] .topbar-brand { color: #DC2626 !important; }
+[data-mci="active"] #main-container { border-top: 3px solid #DC2626; }
+/* ── Notepad FAB hover ── */
+#notepad-fab:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(0,0,0,.22); }
+</style>
+
 <footer id="site-footer">
   <div class="footer-inner">
     <span class="footer-brand">LARP-AID</span>
     <button class="ver-badge" onclick="openVerModal()" title="View changelog" style="margin:0 4px;">
       <span class="ver-dot"></span>
-      <span class="ver-txt">v1.3.0</span>
+      <span class="ver-txt">v1.6.0</span>
     </button>
     <span class="footer-sep">&middot;</span>
     <span class="footer-credit">Built by <strong>B6verly</strong></span>
