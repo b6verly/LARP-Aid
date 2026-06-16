@@ -1138,7 +1138,7 @@ body { margin: 0; }
   <div class="upd-body">
     <div class="upd-notes" id="upd-notes"></div>
     <div class="upd-actions">
-      <a class="upd-download-btn" id="upd-download-link" href="#" target="_blank">⬇ Download</a>
+      <button class="upd-download-btn" id="upd-download-link" onclick="updDownload()">⬇ Download update</button>
       <button class="upd-how-btn" onclick="updToggleHowto()">How to install</button>
     </div>
   </div>
@@ -1237,6 +1237,7 @@ body { margin: 0; }
     <button class="spill" onclick="emsScene('burn',this)">🔥 Burns</button>
     <button class="spill" onclick="emsScene('seizure_sc',this)">⚡ Seizure</button>
     <button class="spill" onclick="emsScene('psych',this)">🧠 Psych / Behavioral</button>
+    <button class="spill" onclick="emsScene('animal_attack',this)">🐾 Animal Attack</button>
   </div>
 
   <!-- MVC -->
@@ -1361,12 +1362,15 @@ body { margin: 0; }
   <!-- Anaphylaxis -->
   <div class="card scene-card" id="ems-sc-anaphylaxis">
     <h3>Anaphylaxis / severe allergic reaction</h3>
-    <div class="prow"><span class="picon">⚡</span><div class="ptxt"><strong>Recognize severity fast</strong><span>Mild = localized hives/itching only. Anaphylaxis = systemic: airway involvement (throat tightening, stridor, hoarse voice), bronchospasm (wheeze), hypotension, GI symptoms, hives across body. Anaphylaxis is lethal in minutes without epinephrine.</span></div></div>
-    <div class="prow"><span class="picon">💉</span><div class="ptxt"><strong>Epinephrine — first, fast, no debate</strong><span>Epi 0.3mg IM, anterolateral thigh (1:1000) — can inject through clothing. Do NOT delay for IV access. Do NOT use Epi IV as first line. Repeat IM q5–15 min if no improvement. Announce: <em>"Epinephrine 0.3mg IM administered [time]."</em></span></div></div>
-    <div class="prow"><span class="picon">🫁</span><div class="ptxt"><strong>Airway &amp; breathing</strong><span>O2 via NRB 15L. Albuterol SVN 2.5mg nebulized if bronchospasm. Watch for stridor — airway edema closes fast. If stridor progresses despite Epi → prepare for surgical airway. Position of comfort: supine + legs elevated for hypotension; sitting up for respiratory distress.</span></div></div>
-    <div class="prow"><span class="picon">🩺</span><div class="ptxt"><strong>Secondary treatments</strong><span>Diphenhydramine (Benadryl) 25–50mg IV/IM — does NOT replace Epi, do not delay Epi for it. NS 500mL–1L bolus for hypotension. Methylprednisolone 125mg IV (slow onset, prevents biphasic reaction). Biphasic anaphylaxis can occur 8–12 hours later — all patients need hospital observation.</span></div></div>
-    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Radio report</strong><span><em>"[Hospital], Medic 1 inbound — anaphylaxis. Epi [X]mg IM given [time]. Airway [open/compromised]. BP [X/X], HR [X], SpO2 [X]%. Responding [yes/no]. ETA [X]."</em></span></div></div>
-    <div style="margin-top:10px;"><span class="badge b-red">Epi 0.3mg IM (FIRST)</span><span class="badge b-blue">O2 NRB</span><span class="badge b-blue">Albuterol SVN</span><span class="badge b-purple">Diphenhydramine 25–50mg</span><span class="badge b-purple">Methylprednisolone 125mg IV</span><span class="badge b-blue">NS bolus x2</span></div>
+    <div class="prow"><span class="picon">⚡</span><div class="ptxt"><strong>Recognize severity fast</strong><span><strong>Mild allergic reaction:</strong> localized hives/itching/redness only, no systemic involvement — Benadryl appropriate. <strong>Anaphylaxis = systemic involvement:</strong> airway (throat tightening, hoarse voice, stridor, tongue/lip swelling), bronchospasm (wheeze, cough, accessory muscle use), cardiovascular (hypotension, syncope, rapid weak pulse), GI (nausea, vomiting, diarrhea, cramping), widespread hives/angioedema. One airway or cardiovascular symptom = anaphylaxis. Do not wait for "full picture." Anaphylaxis kills in minutes without epinephrine.</span></div></div>
+    <div class="prow"><span class="picon">💉</span><div class="ptxt"><strong>Epinephrine — first, fast, no debate</strong><span>Epi 0.3mg IM (1:1000), anterolateral thigh — inject through clothing if needed. Do NOT delay for IV access. Do NOT give diphenhydramine first. Do NOT give Epi IV as first line (fatal risk). Announce: <em>"Epinephrine 0.3mg IM administered [time]."</em> If no improvement in 5–15 min: repeat Epi 0.3mg IM. A third dose may be given — do NOT withhold if patient is not responding. Most anaphylaxis deaths result from delayed Epi.</span></div></div>
+    <div class="prow"><span class="picon">🫁</span><div class="ptxt"><strong>Airway &amp; breathing — immediate threat</strong><span>O2 via NRB 15L — ALL anaphylaxis patients. Albuterol SVN 2.5mg nebulized if bronchospasm (wheeze, cough, SOB) — adjunct to Epi, not replacement. Watch for: stridor (upper airway edema closing), angioedema of tongue/lips/uvula. Stridor despite Epi = prepare for surgical airway — angioedema can make intubation impossible once edema develops. Position: supine + legs elevated for hypotension; sitting up for respiratory distress (let patient choose position of comfort).</span></div></div>
+    <div class="prow"><span class="picon">❤️</span><div class="ptxt"><strong>Circulation — anaphylactic shock</strong><span>Anaphylaxis causes massive vasodilation + capillary leak — up to 50% of intravascular volume can shift to tissues within minutes. Signs: hypotension, tachycardia, syncope, altered LOC. Position supine + legs elevated. NS bolus 500mL–1L IV (ALS) — repeat PRN. If hypotension persists despite Epi + fluids: push-dose Epi 10–20mcg IV (ALS, with orders). Cardiac arrest from anaphylaxis: standard CPR + epinephrine q3–5min — but cause is distributive shock, so aggressive fluid resuscitation alongside.</span></div></div>
+    <div class="prow"><span class="picon">🩺</span><div class="ptxt"><strong>Secondary treatments — adjuncts only</strong><span>Diphenhydramine (Benadryl) 25–50mg IV/IM — H1 blocker, treats hives/itching, does NOT treat bronchospasm or shock, does NOT replace Epi. Methylprednisolone 125mg IV — steroid, slow onset (4–6h), given to prevent biphasic reaction, not for acute treatment. Ranitidine 50mg IV (H2 blocker) — adjunct if available. Do not delay or substitute Epi for any of these medications.</span></div></div>
+    <div class="prow"><span class="picon">⚠️</span><div class="ptxt"><strong>Biphasic anaphylaxis — mandatory hospital obs</strong><span>Biphasic reaction: symptoms resolve, then return 1–8 hours later (sometimes up to 72h) — without re-exposure to allergen. Occurs in ~20% of anaphylaxis cases. Cannot be predicted by initial severity. ALL anaphylaxis patients require hospital observation — minimum 4–6 hours. Patients who want to leave AMA must be informed explicitly of biphasic risk. Document the education given.</span></div></div>
+    <div class="prow bls-only"><span class="picon">🩹</span><div class="ptxt"><strong>BLS — Epi auto-injector, O2, transport</strong><span>EpiPen (0.3mg adult, 0.15mg Jr) — anterolateral thigh. Patient's own auto-injector is the most common scenario. Assist patient if they cannot self-administer. O2 NRB. Position of comfort. Request ALS intercept — these patients need IV access, repeat Epi, fluids. Rapid transport regardless of initial response — biphasic risk.</span></div></div>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Radio report</strong><span><em>"[Hospital], Medic 1 inbound — anaphylaxis. Epi [X]mg IM given [time]. [Second dose given at time if applicable]. Airway [open / compromised — angioedema / stridor]. BP [X/X], HR [X], SpO2 [X]%. Responding [yes / partially / no]. ETA [X]."</em></span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">Epi 0.3mg IM (FIRST)</span><span class="badge b-blue">O2 NRB 15L</span><span class="badge b-blue">Albuterol SVN</span><span class="badge b-purple">Diphenhydramine 25–50mg</span><span class="badge b-purple">Methylprednisolone 125mg IV</span><span class="badge b-blue als-only">NS bolus 500mL–1L</span><span class="badge als-tag als-only">Repeat Epi q5–15 min PRN</span></div>
   </div>
 
   <!-- OB -->
@@ -1444,14 +1448,18 @@ body { margin: 0; }
   <!-- Burns scene protocol -->
   <div class="card scene-card" id="ems-sc-burn">
     <h3>Burns — thermal / chemical / electrical</h3>
-    <div class="prow"><span class="picon">🚫</span><div class="ptxt"><strong>Stop the burning process</strong><span>Remove patient from source. Remove ALL clothing and jewelry — exception: burned-on clothing (do NOT pull). For chemical burns: brush off dry chemical first, then flush with water. Electrical: do NOT touch patient until power source confirmed off.</span></div></div>
-    <div class="prow"><span class="picon">📐</span><div class="ptxt"><strong>Rule of Nines — BSA estimation</strong><span>Head 9%, each arm 9%, each anterior leg 9%, each posterior leg 9%, anterior torso 18%, posterior torso 18%, perineum 1%. Palm of patient's hand = 1% BSA (for irregular burns). Document: location, depth, BSA %.</span></div></div>
-    <div class="prow"><span class="picon">🌡️</span><div class="ptxt"><strong>Burn depth assessment</strong><span>Superficial (1st degree): red, dry, painful — no treatment needed prehospital. Partial thickness (2nd): blistered, moist, very painful — cover with dry sterile dressing. Full thickness (3rd): leathery, white/brown/black, painless — critical.</span></div></div>
-    <div class="prow"><span class="picon">🔥</span><div class="ptxt"><strong>Critical burn indicators</strong><span>Any of these = immediate transport: face/neck/hands/feet/genitals burned, &gt;20% BSA partial/full thickness, full thickness any area, circumferential burns, inhalation injury signs (soot in airway, hoarse voice, singed nose hairs), electrical mechanism, chemical exposure.</span></div></div>
-    <div class="prow als-only"><span class="picon">💉</span><div class="ptxt"><strong>ALS — fluids &amp; airway</strong><span>Parkland formula: 4mL × kg × %BSA burned = 24hr fluid needs. Give half in first 8hr (from time of injury, not from your arrival). IV NS. For inhalation injury with stridor: rapid sequence intubation before airway swells shut. Do NOT delay.</span></div></div>
-    <div class="prow bls-only"><span class="picon">🩹</span><div class="ptxt"><strong>BLS — cover, comfort, transport</strong><span>Dry sterile dressings only (no creams, butter, or ice). Prevent hypothermia — burns destroy skin thermoregulation. O2 NRB. Request ALS intercept if &gt;10% BSA or inhalation injury signs.</span></div></div>
-    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Radio report</strong><span><em>"# [Hospital], Medic 1 inbound — burn patient. Estimated [X]% BSA. [Partial / full thickness]. [Thermal / chemical / electrical]. Airway [clear / compromised]. ETA [X]."</em></span></div></div>
-    <div style="margin-top:10px;"><span class="badge b-red">Burn dressings (dry, sterile)</span><span class="badge b-blue">O2 NRB</span><span class="badge b-amber">Hypothermia prevention</span><span class="badge b-blue als-only">IV NS large bore</span><span class="badge als-tag als-only">RSI (airway burns)</span></div>
+    <div class="prow"><span class="picon">🚫</span><div class="ptxt"><strong>Stop the burning process</strong><span>Remove patient from source. Remove ALL clothing and jewelry — exception: burned-on clothing (do NOT pull). Chemical burns: brush off dry chemical first, then flush 20–30 min continuous water. Electrical: do NOT touch patient until power source confirmed off — treat scene as unsafe until confirmed.</span></div></div>
+    <div class="prow"><span class="picon">📐</span><div class="ptxt"><strong>Rule of Nines — BSA estimation</strong><span>Head 9%, each arm 9%, each anterior leg 9%, each posterior leg 9%, anterior torso 18%, posterior torso 18%, perineum 1%. Palm of patient's hand ≈ 1% BSA — use it for irregular burn shapes. In pediatric patients: head is proportionally larger (18%) and legs smaller. Document: location, depth, total BSA %.</span></div></div>
+    <div class="prow"><span class="picon">🌡️</span><div class="ptxt"><strong>Burn depth assessment</strong><span><strong>Superficial (1st degree):</strong> red, dry, painful, no blisters — no prehospital dressing needed, reassure patient. <strong>Partial thickness (2nd degree):</strong> blistered, moist, extremely painful, bright red or pale pink — cover with dry sterile dressing, do NOT pop blisters. <strong>Full thickness (3rd degree):</strong> leathery, white/brown/black/charred, painless (nerves destroyed) — always critical.</span></div></div>
+    <div class="prow"><span class="picon">🔥</span><div class="ptxt"><strong>Critical burn indicators — immediate transport</strong><span>Any single one = load and go: face/neck/hands/feet/genitalia burned, &gt;20% BSA partial/full thickness, full thickness ANY area, circumferential burns (limb or chest), inhalation injury signs (soot in airway, hoarse voice, singed nasal hairs, carbonaceous sputum), electrical mechanism, chemical exposure to face/eyes, burn + blast injury.</span></div></div>
+    <div class="prow"><span class="picon">⚡</span><div class="ptxt"><strong>Electrical burns — hidden injury</strong><span>Entry and exit wounds are only the surface — the internal track through tissue is the real injury. Look for: cardiac dysrhythmia (all electrical contacts need 12-lead), rhabdomyolysis (myoglobinuria — dark "tea" colored urine), spinal injury from tetanic muscle contraction, occult fractures. Even low-voltage contacts can cause VF. All electrical burn patients need hospital evaluation.</span></div></div>
+    <div class="prow"><span class="picon">☣️</span><div class="ptxt"><strong>Chemical burns — decontamination</strong><span>Flush continuously with large volumes of room-temperature water for minimum 20–30 min. Dry chemical: brush off before water. Hydrofluoric acid (industrial): calcium gluconate gel if available — penetrates deep and can cause fatal hypocalcemia. Alkalis (lye, cement) are worse than acids — continue flushing. Protect yourself — secondary contamination risk. Eyes: flush with NS via Morgan lens if available.</span></div></div>
+    <div class="prow"><span class="picon">🩹</span><div class="ptxt"><strong>Circumferential burns — eschar watch</strong><span>Circumferential full-thickness burns create a rigid eschar (dead tissue) that can act as a tourniquet as swelling increases underneath. Limb: assess distal pulses q5 min — loss = compartment syndrome emergency. Chest: eschar can prevent chest wall expansion — watch for worsening respiratory failure. Both require emergent escharotomy at hospital — notify early.</span></div></div>
+    <div class="prow als-only"><span class="picon">💉</span><div class="ptxt"><strong>ALS — fluids, airway &amp; pain</strong><span>Parkland formula: 4mL × kg × %BSA = 24hr total (half in first 8hr from TIME OF INJURY, not arrival). IV NS large-bore x2. Airway burns: if stridor or hoarse voice — RSI NOW before edema closes the airway. Fentanyl for pain — burns are extremely painful. Morphine avoided in hypotensive patients.</span></div></div>
+    <div class="prow bls-only"><span class="picon">🩹</span><div class="ptxt"><strong>BLS — cover, comfort, transport</strong><span>Dry sterile dressings only — no creams, butter, toothpaste, ice, or wet dressings on large burns (hypothermia risk). Prevent hypothermia — burns destroy thermoregulation. O2 NRB. Oral analgesics only per protocol. ALS intercept for &gt;10% BSA, inhalation injury, or electrical mechanism.</span></div></div>
+    <div class="prow"><span class="picon">🌡️</span><div class="ptxt"><strong>Hypothermia — major threat</strong><span>Burned skin cannot regulate temperature. Large BSA burns lose heat rapidly. Avoid wet dressings, cold water, exposed skin. Cover patient with dry blankets. Warmed IV fluids if available (ALS). Hypothermia worsens outcomes significantly — treat it as aggressively as the burn itself.</span></div></div>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Radio report</strong><span><em>"[Hospital], Medic 1 inbound — burn patient. Estimated [X]% BSA. [Superficial / partial / full thickness]. [Thermal / chemical / electrical]. Airway [clear / compromised — hoarse/stridor]. Circumferential [yes/no]. ETA [X] — requesting burn team."</em></span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">Burn dressings (dry, sterile)</span><span class="badge b-blue">O2 NRB</span><span class="badge b-amber">Hypothermia prevention</span><span class="badge b-blue als-only">IV NS x2 large bore</span><span class="badge als-tag als-only">RSI (airway burns)</span><span class="badge als-tag als-only">Fentanyl (pain mgmt)</span><span class="badge b-amber">12-lead (electrical)</span></div>
   </div>
 
   <!-- Seizure scene protocol -->
@@ -1484,6 +1492,21 @@ body { margin: 0; }
       <span class="badge als-tag als-only">Midazolam 10mg IM (ExDS)</span><span class="badge b-blue als-only">12-lead ECG</span>
       <span class="badge b-green bls-only">ALS intercept if combative</span>
     </div>
+  </div>
+
+  <!-- Animal Attack scene protocol -->
+  <div class="card scene-card" id="ems-sc-animal_attack">
+    <h3>Animal attack / bite</h3>
+    <div class="prow"><span class="picon">🛡️</span><div class="ptxt"><strong>Scene safety — animal still present?</strong><span>Do NOT approach until animal is confirmed contained or gone. Domestic animal attacks: request animal control if animal is still on scene. Wild animal: stage until law enforcement clears. Do NOT enter to retrieve a patient if the animal is active — announce staging and await containment. A second victim helps no one.</span></div></div>
+    <div class="prow"><span class="picon">🩸</span><div class="ptxt"><strong>Hemorrhage control first</strong><span>Animal attacks can produce severe lacerations and puncture wounds — arterial hemorrhage is possible. Apply direct pressure immediately. Extremity: CAT tourniquet if uncontrolled arterial bleed. Neck/face/scalp: manual pressure with hemostatic gauze — no tourniquet options here. Large dog bites can fracture underlying bone — treat wound AND assess for orthopedic injury.</span></div></div>
+    <div class="prow"><span class="picon">🔍</span><div class="ptxt"><strong>Wound assessment — bites are deceptive</strong><span>Puncture wounds appear small but can track deep. Assess for: underlying fracture (especially dog bites to hands/forearms in children), tendon or neurovascular involvement, evisceration in large predator attacks, degloving injuries. Do NOT probe the wound on scene. Document exact location, size, and depth estimate.</span></div></div>
+    <div class="prow"><span class="picon">🧫</span><div class="ptxt"><strong>Infection risk — all bites are contaminated</strong><span>Animal bites carry extremely high infection risk: dog saliva contains Pasteurella, Capnocytophaga (especially dangerous in immunocompromised or asplenic patients — can be fatal). Cat bites are particularly infectious despite appearing minor — deep punctures inoculate bacteria under skin. Irrigate copiously with saline if available, but wound closure is a hospital decision. Document last tetanus immunization.</span></div></div>
+    <div class="prow"><span class="picon">🦠</span><div class="ptxt"><strong>Rabies risk — document everything</strong><span>Any unprovoked wild animal attack has rabies risk: bats, raccoons, foxes, skunks, coyotes — highest risk. Dogs and cats: rabies possible, especially unvaccinated or stray. Domestic livestock: lower risk. Document: animal species, provoked vs unprovoked behavior, animal's condition (sick-acting, daytime bat exposure), animal's fate (escaped, contained, deceased). All info is critical for rabies post-exposure prophylaxis (PEP) decision at hospital.</span></div></div>
+    <div class="prow"><span class="picon">👶</span><div class="ptxt"><strong>Pediatric — higher severity pattern</strong><span>Children are at greatest risk for head and neck bites (short stature = face at dog's mouth level). Pediatric skull is thinner — dog bites to the head can penetrate cranium. Assess neuro status. Scalp lacerations bleed profusely — do not underestimate blood loss. Prioritize airway (potential neck injury) and hemorrhage.</span></div></div>
+    <div class="prow als-only"><span class="picon">💉</span><div class="ptxt"><strong>ALS — hemorrhage, airway, pain</strong><span>Large-vessel neck bite: two-finger pressure over vessel, do NOT clamp blindly. IV x2 if significant bleeding. Fentanyl for pain. Airway compromise from neck bite or swelling: early intubation. Fluid resuscitation for hemorrhagic shock. 12-lead if significant blood loss (compensatory tachycardia).</span></div></div>
+    <div class="prow bls-only"><span class="picon">🩹</span><div class="ptxt"><strong>BLS — control, cover, transport</strong><span>Control bleeding with direct pressure. Moist sterile dressing on wounds. Do NOT attempt wound closure or deep irrigation in field. Splint extremity if fracture suspected. ALS intercept for arterial hemorrhage, airway involvement, or pediatric head/neck bite.</span></div></div>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Radio report</strong><span><em>"[Hospital], Medic 1 inbound — animal attack. [Species: dog/cat/wildlife]. [Location of wounds: face/neck/extremity]. Bleeding [controlled / ongoing]. [Pediatric — head/neck bite]. Animal [contained / escaped / deceased]. ETA [X]."</em></span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">CAT Tourniquet (extremity)</span><span class="badge b-red">Hemostatic gauze</span><span class="badge b-blue">Saline irrigation</span><span class="badge b-blue">Sterile dressings</span><span class="badge b-amber">Rabies documentation</span><span class="badge b-blue als-only">IV x2</span><span class="badge als-tag als-only">Fentanyl (pain)</span></div>
   </div>
 
 </div>
@@ -1534,6 +1557,10 @@ body { margin: 0; }
     <div class="field"><label>Respirations (/min)</label><input type="number" id="t-rr" placeholder="e.g. 16" min="0" max="60"></div>
     <div class="field"><label>SpO2 (%)</label><input type="number" id="t-spo2" placeholder="e.g. 97" min="0" max="100"></div>
     <div class="field"><label>GCS (3–15)</label><input type="number" id="t-gcs" placeholder="e.g. 15" min="3" max="15"></div>
+    <div class="field"><label>Blood Glucose (mg/dL)</label><input type="number" id="t-bg" placeholder="e.g. 98" min="0" max="600"></div>
+    <div class="field"><label>Temperature (°F)</label><input type="number" id="t-temp" placeholder="e.g. 98.6" min="80" max="115" step="0.1"></div>
+    <div class="field"><label>Pain scale (0–10)</label><input type="number" id="t-pain" placeholder="e.g. 7" min="0" max="10"></div>
+    <div class="field"><label>Patient age (years)</label><input type="number" id="t-age" placeholder="e.g. 45" min="0" max="120"></div>
   </div>
   <p class="sec-label" style="margin-bottom:8px;">AVPU</p>
   <div class="avpu-row" style="margin-bottom:14px;">
@@ -1559,6 +1586,8 @@ body { margin: 0; }
     <label class="chk-lbl"><input type="checkbox" id="c-chest"> Chest pain / pressure</label>
     <label class="chk-lbl"><input type="checkbox" id="c-jvd"> JVD (jugular vein distension)</label>
     <label class="chk-lbl"><input type="checkbox" id="c-pulseless_extremity"> Pulseless extremity</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-diaphoresis"> Diaphoresis (cold, clammy sweating)</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-pallor"> Pallor / mottling / skin color change</label>
 
     <p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:8px 0 4px;grid-column:1/-1;">Neuro &amp; Mental Status</p>
     <label class="chk-lbl"><input type="checkbox" id="c-altered"> Altered mental status / confusion</label>
@@ -1567,6 +1596,8 @@ body { margin: 0; }
     <label class="chk-lbl"><input type="checkbox" id="c-pupils_unequal"> Unequal or blown pupils</label>
     <label class="chk-lbl"><input type="checkbox" id="c-posturing"> Decorticate / decerebrate posturing</label>
     <label class="chk-lbl"><input type="checkbox" id="c-agitated"> Extreme agitation / combative</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-headache"> Severe headache ("worst of life")</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-nausea"> Nausea / vomiting</label>
 
     <p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:8px 0 4px;grid-column:1/-1;">Trauma</p>
     <label class="chk-lbl"><input type="checkbox" id="c-frac"> Suspected fracture</label>
@@ -1575,6 +1606,8 @@ body { margin: 0; }
     <label class="chk-lbl"><input type="checkbox" id="c-eviscer"> Evisceration / impaled object</label>
     <label class="chk-lbl"><input type="checkbox" id="c-amputation"> Traumatic amputation</label>
     <label class="chk-lbl"><input type="checkbox" id="c-crush"> Crush injury / entrapment</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-tbi"> Suspected TBI / head trauma</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-penetrating"> Penetrating chest/abdominal wound</label>
 
     <p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:8px 0 4px;grid-column:1/-1;">Medical / Toxicological</p>
     <label class="chk-lbl"><input type="checkbox" id="c-od"> Suspected overdose / poisoning</label>
@@ -1583,6 +1616,16 @@ body { margin: 0; }
     <label class="chk-lbl"><input type="checkbox" id="c-fever"> High fever (&gt;103°F) / hyperthermia</label>
     <label class="chk-lbl"><input type="checkbox" id="c-hypothermia_sx"> Hypothermia signs (shivering / rigid)</label>
     <label class="chk-lbl"><input type="checkbox" id="c-pain"> Severe pain (7–10/10)</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-dyspnea"> Shortness of breath / dyspnea</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-syncope"> Syncope / near-syncope</label>
+
+    <p style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#64748B;margin:8px 0 4px;grid-column:1/-1;">Special Populations</p>
+    <label class="chk-lbl"><input type="checkbox" id="c-diabetic_hx"> Known diabetic</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-cardiac_hx"> Known cardiac history</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-anticoag"> On anticoagulants (Warfarin/Xarelto/Eliquis)</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-pregnancy"> Pregnant / possible pregnancy</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-pediatric_pt"> Pediatric patient (&lt;18)</label>
+    <label class="chk-lbl"><input type="checkbox" id="c-geriatric_pt"> Geriatric patient (&gt;65)</label>
   </div>
   <button class="assess-btn" onclick="runAssess()">🩺 Assess patient</button>
   <div id="assess-result"></div>
@@ -3246,12 +3289,19 @@ function runAssess() {
   var rrRaw  = document.getElementById('t-rr').value;
   var spo2Raw= document.getElementById('t-spo2').value;
   var gcsRaw = document.getElementById('t-gcs').value;
+  var bgEl   = document.getElementById('t-bg');   var bgRaw  = bgEl   ? bgEl.value   : '';
+  var tempEl = document.getElementById('t-temp'); var tempRaw= tempEl ? tempEl.value : '';
+  var painEl = document.getElementById('t-pain'); var painRaw= painEl ? painEl.value : '';
+  var ageEl  = document.getElementById('t-age');  var ageRaw = ageEl  ? ageEl.value  : '';
   if (sbpRaw !== '' && (parseFloat(sbpRaw) < 0 || parseFloat(sbpRaw) > 300))  errMsgs.push('SBP out of range (0–300 mmHg)');
   if (dbpRaw !== '' && (parseFloat(dbpRaw) < 0 || parseFloat(dbpRaw) > 200))  errMsgs.push('DBP out of range (0–200 mmHg)');
   if (hrRaw  !== '' && (parseFloat(hrRaw)  < 0 || parseFloat(hrRaw)  > 300))  errMsgs.push('Heart rate out of range (0–300 bpm)');
   if (rrRaw  !== '' && (parseFloat(rrRaw)  < 0 || parseFloat(rrRaw)  > 60))   errMsgs.push('Respirations out of range (0–60 /min)');
   if (spo2Raw!== '' && (parseFloat(spo2Raw)< 0 || parseFloat(spo2Raw)> 100))  errMsgs.push('SpO2 out of range (0–100 %)');
   if (gcsRaw !== '' && (parseFloat(gcsRaw) < 3 || parseFloat(gcsRaw) > 15))   errMsgs.push('GCS out of range (3–15)');
+  if (bgRaw  !== '' && (parseFloat(bgRaw)  < 0 || parseFloat(bgRaw)  > 600))  errMsgs.push('Blood glucose out of range (0–600 mg/dL)');
+  if (tempRaw!== '' && (parseFloat(tempRaw)< 80 || parseFloat(tempRaw)> 115)) errMsgs.push('Temperature out of range (80–115 °F)');
+  if (painRaw!== '' && (parseFloat(painRaw)< 0 || parseFloat(painRaw)> 10))   errMsgs.push('Pain scale out of range (0–10)');
   if (sbpRaw !== '' && dbpRaw !== '' && parseFloat(sbpRaw) <= parseFloat(dbpRaw)) errMsgs.push('SBP must be greater than DBP');
   if (errMsgs.length) {
     document.getElementById('assess-result').innerHTML = '<div class="result-card" style="background:#FFFBEB;border-color:#FDE68A;"><p class="r-label" style="color:#92400E;">⚠️ Input error — please correct:</p><ul style="margin:6px 0 0;padding-left:18px;font-size:12.5px;color:#92400E;">' + errMsgs.map(function(m){return '<li>'+m+'</li>';}).join('') + '</ul></div>';
@@ -3259,15 +3309,41 @@ function runAssess() {
     return;
   }
   var sbp=gv('t-sbp'),hr=gv('t-hr'),rr=gv('t-rr'),spo2=gv('t-spo2'),gcs=gv('t-gcs');
+  var bg=bgRaw!==''?parseFloat(bgRaw):null, temp=tempRaw!==''?parseFloat(tempRaw):null;
+  var painScore=painRaw!==''?parseFloat(painRaw):null, age=ageRaw!==''?parseFloat(ageRaw):null;
   var flags=[],score=0;
   var noPulse=gc('c-nopulse'),airway=gc('c-airway'),bleed=gc('c-bleed');
   var chest=gc('c-chest'),frac=gc('c-frac'),burns=gc('c-burn');
   var altered=gc('c-altered'),pain=gc('c-pain'),od=gc('c-od'),co=gc('c-co');
   var stridor=gc('c-stridor'),apneic=gc('c-apneic'),wheeze=gc('c-wheeze'),cyanosis=gc('c-cyanosis');
   var shock=gc('c-shock'),jvd=gc('c-jvd'),pulselessEx=gc('c-pulseless_extremity');
+  var diaphoresis=gc('c-diaphoresis'),pallor=gc('c-pallor'),headache=gc('c-headache'),nausea_sx=gc('c-nausea');
   var seizure=gc('c-seizure'),strokeSx=gc('c-stroke_sx'),pupilsUneq=gc('c-pupils_unequal'),posturing=gc('c-posturing'),agitated=gc('c-agitated');
   var spinal=gc('c-spinal'),eviscer=gc('c-eviscer'),amputation=gc('c-amputation'),crush=gc('c-crush');
+  var tbi=gc('c-tbi'),penetrating=gc('c-penetrating'),dyspnea=gc('c-dyspnea'),syncope=gc('c-syncope');
   var hypoglycemia=gc('c-hypoglycemia'),anaphylaxis=gc('c-anaphylaxis'),fever=gc('c-fever'),hypothermia_sx=gc('c-hypothermia_sx');
+  var diabeticHx=gc('c-diabetic_hx'),cardiacHx=gc('c-cardiac_hx'),anticoag=gc('c-anticoag');
+  var pregnancy=gc('c-pregnancy'),pediatricPt=gc('c-pediatric_pt'),geriatricPt=gc('c-geriatric_pt');
+  /* Blood glucose auto-detection */
+  if(bg!==null){
+    if(bg<40){flags.push({t:'Critical hypoglycemia (BG '+Math.round(bg)+' mg/dL)',l:3});score=Math.max(score,30);hypoglycemia=true;}
+    else if(bg<60){flags.push({t:'Hypoglycemia (BG '+Math.round(bg)+' mg/dL)',l:2});score=Math.max(score,22);hypoglycemia=true;}
+    else if(bg>400){flags.push({t:'Critical hyperglycemia / DKA (BG '+Math.round(bg)+' mg/dL)',l:3});score=Math.max(score,25);}
+    else if(bg>300){flags.push({t:'Hyperglycemia (BG '+Math.round(bg)+' mg/dL)',l:2});score=Math.max(score,15);}
+    else if(bg>180){flags.push({t:'Elevated glucose (BG '+Math.round(bg)+' mg/dL)',l:1});score=Math.max(score,8);}
+  }
+  /* Temperature auto-detection */
+  if(temp!==null){
+    if(temp>=104){flags.push({t:'Hyperthermia / heat emergency ('+temp.toFixed(1)+'°F)',l:3});score=Math.max(score,28);fever=true;}
+    else if(temp>=103){flags.push({t:'High fever ('+temp.toFixed(1)+'°F)',l:2});score=Math.max(score,15);fever=true;}
+    else if(temp<94){flags.push({t:'Hypothermia ('+temp.toFixed(1)+'°F)',l:3});score=Math.max(score,28);hypothermia_sx=true;}
+    else if(temp<96.5){flags.push({t:'Mild hypothermia ('+temp.toFixed(1)+'°F)',l:2});score=Math.max(score,15);}
+  }
+  /* Pain score auto-flag */
+  if(painScore!==null){
+    if(painScore>=8){flags.push({t:'Severe pain ('+Math.round(painScore)+'/10)',l:2});score=Math.max(score,15);pain=true;}
+    else if(painScore>=5){flags.push({t:'Moderate pain ('+Math.round(painScore)+'/10)',l:1});score=Math.max(score,8);}
+  }
   if(noPulse){flags.push({t:'No pulse detected',l:3});score=Math.max(score,40);}
   if(airway){flags.push({t:'Airway compromised',l:3});score=Math.max(score,35);}
   if(apneic){flags.push({t:'Apneic / agonal breathing',l:3});score=Math.max(score,36);}
@@ -3306,6 +3382,17 @@ function runAssess() {
   if(fever){flags.push({t:'High fever/hyperthermia',l:1});score=Math.max(score,10);}
   if(hypothermia_sx){flags.push({t:'Hypothermia signs',l:1});score=Math.max(score,12);}
   if(wheeze){flags.push({t:'Bronchospasm/wheeze',l:1});score=Math.max(score,12);}
+  if(diaphoresis){flags.push({t:'Diaphoresis',l:1});score=Math.max(score,10);}
+  if(pallor){flags.push({t:'Pallor / mottling',l:1});score=Math.max(score,10);}
+  if(headache){flags.push({t:'Severe headache ("worst of life")',l:2});score=Math.max(score,18);}
+  if(tbi){flags.push({t:'Suspected TBI / head trauma',l:2});score=Math.max(score,20);}
+  if(penetrating){flags.push({t:'Penetrating chest/abdominal wound',l:3});score=Math.max(score,30);}
+  if(dyspnea){flags.push({t:'Shortness of breath',l:2});score=Math.max(score,15);}
+  if(syncope){flags.push({t:'Syncope / near-syncope',l:2});score=Math.max(score,15);}
+  if(pregnancy){flags.push({t:'Pregnant patient',l:1});score=Math.max(score,8);}
+  if(anticoag){flags.push({t:'On anticoagulants',l:1});score=Math.max(score,8);}
+  if(pediatricPt||( age!==null && age<18)){flags.push({t:'Pediatric patient',l:1});score=Math.max(score,6);}
+  if(geriatricPt||(age!==null && age>65)){flags.push({t:'Geriatric patient',l:1});score=Math.max(score,6);}
   var priority,sublabel,desc,actions,bc,bg,lc,pc,dc;
   if(noPulse&&(avpuVal==='U'||(gcs!==null&&gcs<=3))){priority='Black — expectant';sublabel='Deceased / unsurvivable';desc='No pulse and unresponsive. Injuries incompatible with survival. Document time, move to next patient.';actions='Document time of death. Move to next patient.';bc='#888780';bg='#F1EFE8';lc='#5F5E5A';pc='#2C2C2A';dc='#5F5E5A';}
   else if(score>=28){priority='Red — immediate';sublabel='Life-threatening';desc='Critical findings detected. Life, airway, or circulation acutely threatened. Act now.';actions='Control bleeding → secure airway → O2 → IV access → rapid transport.';bc='#E24B4A';bg='#FCEBEB';lc='#A32D2D';pc='#791F1F';dc='#A32D2D';}
@@ -3314,7 +3401,7 @@ function runAssess() {
   var fc=[['#B5D4F4','#0C447C'],['#C0DD97','#27500A'],['#FAC775','#633806'],['#F7C1C1','#791F1F']];
   var fHTML=flags.length?flags.map(function(f){var c=fc[Math.min(f.l,3)];return'<span class="rflag" style="background:'+c[0]+';color:'+c[1]+'">'+f.t+'</span>';}).join(''):'<span class="rflag" style="background:#EAF3DE;color:#3B6D11">No abnormal flags</span>';
   var vHTML='';
-  if(sbp!==null||hr!==null||rr!==null||spo2!==null||gcs!==null){vHTML='<div class="vitals-row">';if(sbp!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">BP syst.</p><p class="vi-val" style="color:'+pc+'">'+Math.round(sbp)+' mmHg</p></div>';if(hr!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">HR</p><p class="vi-val" style="color:'+pc+'">'+Math.round(hr)+' bpm</p></div>';if(rr!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">RR</p><p class="vi-val" style="color:'+pc+'">'+Math.round(rr)+'/min</p></div>';if(spo2!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">SpO2</p><p class="vi-val" style="color:'+pc+'">'+Math.round(spo2)+'%</p></div>';if(gcs!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">GCS</p><p class="vi-val" style="color:'+pc+'">'+Math.round(gcs)+'/15</p></div>';if(avpuVal)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">AVPU</p><p class="vi-val" style="color:'+pc+'">'+avpuVal+'</p></div>';vHTML+='</div>';}
+  if(sbp!==null||hr!==null||rr!==null||spo2!==null||gcs!==null||bg!==null||temp!==null||painScore!==null){vHTML='<div class="vitals-row">';if(sbp!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">BP syst.</p><p class="vi-val" style="color:'+pc+'">'+Math.round(sbp)+' mmHg</p></div>';if(hr!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">HR</p><p class="vi-val" style="color:'+pc+'">'+Math.round(hr)+' bpm</p></div>';if(rr!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">RR</p><p class="vi-val" style="color:'+pc+'">'+Math.round(rr)+'/min</p></div>';if(spo2!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">SpO2</p><p class="vi-val" style="color:'+pc+'">'+Math.round(spo2)+'%</p></div>';if(gcs!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">GCS</p><p class="vi-val" style="color:'+pc+'">'+Math.round(gcs)+'/15</p></div>';if(avpuVal)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">AVPU</p><p class="vi-val" style="color:'+pc+'">'+avpuVal+'</p></div>';if(bg!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">BG</p><p class="vi-val" style="color:'+(bg<60||bg>300?'#E24B4A':bg<70||bg>180?'#EF9F27':pc)+'">'+Math.round(bg)+' mg/dL</p></div>';if(temp!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">Temp</p><p class="vi-val" style="color:'+(temp>=103||temp<96.5?'#E24B4A':pc)+'">'+temp.toFixed(1)+'°F</p></div>';if(painScore!==null)vHTML+='<div class="vi"><p class="vi-label" style="color:'+dc+'">Pain</p><p class="vi-val" style="color:'+(painScore>=8?'#E24B4A':painScore>=5?'#EF9F27':pc)+'">'+Math.round(painScore)+'/10</p></div>';vHTML+='</div>';}
   document.getElementById('assess-result').innerHTML='<div class="result-card" style="background:'+bg+';border-color:'+bc+'"><p class="r-label" style="color:'+lc+'">'+sublabel+'</p><p class="r-priority" style="color:'+pc+'">'+priority+'</p>'+vHTML+'<p class="r-desc" style="color:'+dc+'">'+desc+'</p><p class="r-actions" style="color:'+lc+'">→ '+actions+'</p><div class="r-flags">'+fHTML+'</div></div>';
 
   /* ── Specific assessments based on signs & symptoms ── */
@@ -5568,9 +5655,20 @@ function leoReportClear() {
   var wrap = document.getElementById('lr-output-wrap'); if (wrap) wrap.style.display = 'none';
 }
 
-var LARPAID_VERSION = '1.6.0';
+var LARPAID_VERSION = '1.7.0';
 
 var CHANGELOG = [
+  {
+    ver:   '1.7.0',
+    date:  'June 2026',
+    tags:  ['new','improved'],
+    notes: [
+      { type:'new',      text:'Animal Attack scene protocol — full card with scene safety, hemorrhage control, wound assessment, rabies risk/documentation, pediatric patterns, infection risk (Pasteurella, Capnocytophaga), ALS/BLS branches, and radio report.' },
+      { type:'improved', text:'Burns scene card expanded — added separate electrical burn protocol (dysrhythmia, rhabdomyolysis, internal track), chemical burn decontamination (HF acid, alkali flush duration), circumferential burn / eschar watch, hypothermia section, pain management guidance.' },
+      { type:'improved', text:'Anaphylaxis scene card expanded — added biphasic anaphylaxis warning, detailed circulation/shock section, push-dose Epi guidance (ALS), detailed staging of mild allergic vs anaphylaxis, BLS branch, and third-dose Epi guidance.' },
+      { type:'improved', text:'Triage calculator upgraded — added Blood Glucose, Temperature, Pain Scale, and Age fields with auto-detection (hypoglycemia auto-flags, fever auto-flags, hypothermia auto-flags, pain score auto-flags). Added 12 new sign/symptom checkboxes: Diaphoresis, Pallor, Severe Headache, TBI, Penetrating wound, Dyspnea, Syncope, Nausea, and special population flags (Diabetic hx, Cardiac hx, Anticoagulants, Pregnant, Pediatric, Geriatric). Vitals display now shows BG, Temp, and Pain with color-coded severity.' },
+    ]
+  },
   {
     ver:   '1.6.0',
     date:  'June 2026',
@@ -5668,8 +5766,12 @@ function openVerModal() {
     /* changes */
     html += '<ul class="ver-changes">';
     entry.notes.forEach(function(n){
-      var cls = (n.type === 'improved' || n.type === 'fix') ? 'ver-fix' : (n.type === 'new' || n.type === 'add') ? 'ver-add' : 'ver-'+n.type;
-      html += '<li class="' + cls + '">' + escHtml(n.text) + '</li>';
+      if (typeof n === 'string') {
+        html += '<li class="ver-add">' + escHtml(n) + '</li>';
+      } else {
+        var cls = (n.type === 'improved' || n.type === 'fix') ? 'ver-fix' : (n.type === 'new' || n.type === 'add') ? 'ver-add' : 'ver-'+n.type;
+        html += '<li class="' + cls + '">' + escHtml(n.text) + '</li>';
+      }
     });
     html += '</ul>';
     if (i < CHANGELOG.length - 1) html += '<hr class="ver-divider">';
@@ -5756,8 +5858,36 @@ function updShowBanner(remoteVer, notes, downloadUrl) {
   }
 
   var link = document.getElementById('upd-download-link');
-  link.href = downloadUrl || UPDATE_DOWNLOAD_URL;
+  link.dataset.url = downloadUrl || UPDATE_DOWNLOAD_URL;
   document.getElementById('update-banner').classList.add('vis');
+}
+
+function updDownload() {
+  var btn = document.getElementById('upd-download-link');
+  var url = (btn && btn.dataset.url) || UPDATE_DOWNLOAD_URL;
+  var orig = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Downloading…'; btn.disabled = true; }
+  fetch(url, { cache: 'no-store' })
+    .then(function(r) {
+      if (!r.ok) throw new Error('fetch failed');
+      return r.blob();
+    })
+    .then(function(blob) {
+      var blobUrl = URL.createObjectURL(new Blob([blob], { type: 'text/html' }));
+      var a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'larp_aid.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function() { URL.revokeObjectURL(blobUrl); }, 5000);
+      if (btn) { btn.textContent = '✓ Downloaded'; btn.disabled = false; }
+    })
+    .catch(function() {
+      /* Fallback — open raw URL directly */
+      window.open(url, '_blank');
+      if (btn) { btn.textContent = orig; btn.disabled = false; }
+    });
 }
 
 function updDismiss() {
