@@ -1,5 +1,5 @@
 # LARP-AID
-**A desktop field reference tool for EMS, LEO, and Fire roles in the Greenville / Brookmere Roblox LARP.**
+**A desktop field reference tool for EMS, LEO, and Fire roles in the Greenville Roblox LARP.**
 Built for GVFD, BFD, WSP, and OCSO.
 ![Version](https://img.shields.io/badge/version-v1.8.0-58a6ff?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen?style=flat-square)
