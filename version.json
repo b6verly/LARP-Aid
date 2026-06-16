@@ -1,6 +1,6 @@
 {
-  "version": "1.6.0",
+  "version": "1.7.0",
   "date": "June 2026",
-  "notes": ["Timers tab added", "MCI alert mode", "Pop-out notepad", "Triage calculator improvements", "LEO functionality overhaul", "Bug fixes & pin fixes"],
+  "notes": ["Burns expanded", "Animal attacks added", "Anaphylaxis expanded", "Triage calculator upgraded"],
   "download_url": "https://raw.githubusercontent.com/b6verly/LARP-Aid/refs/heads/main/releases/larp_aid.html"
 }
