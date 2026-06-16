@@ -1,7 +1,7 @@
 # LARP-AID
-**A desktop field reference tool for EMS & LEO roles in the Greenville / Brookmere Roblox LARP.**
+**A desktop field reference tool for EMS, LEO, and Fire roles in the Greenville / Brookmere Roblox LARP.**
 Built for GVFD, BFD, WSP, and OCSO.
-![Version](https://img.shields.io/badge/version-v1.7.0-58a6ff?style=flat-square)
+![Version](https://img.shields.io/badge/version-v1.8.0-58a6ff?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen?style=flat-square)
 ![Updates](https://img.shields.io/badge/auto--updates-enabled-3fb950?style=flat-square)
 
@@ -50,15 +50,16 @@ Starting with **v1.7.0**, LARP-AID updates itself. When you open the app, it sil
 
 ---
 
-## ✦ What's New in v1.7.0
+## ✦ What's New in v1.8.0
 
 | Type | Change |
 |------|--------|
-| 🆕 New | **Automatic updates** — app silently updates itself on launch via GitHub |
-| 🆕 New | **Animal Attack scene protocol** — scene safety, hemorrhage control, wound assessment, rabies documentation, infection risk, pediatric bite patterns, ALS/BLS branches |
-| ↑ Improved | **Burns scene card** — electrical burn protocol, chemical burn decon, circumferential burn / eschar watch, hypothermia section, pain management |
-| ↑ Improved | **Anaphylaxis scene card** — mild vs systemic staging, push-dose Epi, anaphylactic shock section, biphasic anaphylaxis warning, BLS auto-injector branch |
-| ↑ Improved | **Triage calculator** — Blood Glucose, Temperature, Pain Scale, and Age fields with auto-detection; 12 new signs & symptoms checkboxes; color-coded vitals display |
+| 🆕 New | **🔥 Fire section** — GVFD / BFD added as a full third mode alongside EMS and LEO |
+| 🆕 New | **Scene Protocols** — Structure Fire (offensive/transitional/defensive attack), Vehicle Fire, Wildland, Tech Rescue, Water Rescue, SAR, and HazMat |
+| 🆕 New | **Specialized Teams tab** — dedicated cards for RIC, HazMat Team, Wildland Division, Tech Rescue Team, Swift Water/Dive Team, and SAR Team |
+| 🆕 New | **HazMat reference** — EPA/OSHA PPE levels A–D, extinguisher classes A/B/C/D/K, DOT placard classes 1–9, and 8 common material profiles |
+| 🆕 New | **Abbreviations tab** — 40+ fire/HazMat terms covering ICS, operations, radiological, and fire behavior |
+| 🆕 New | **Nav Aids, Equipment Status tracker, and Radio & Comms tab** |
 
 ---
 
@@ -66,6 +67,7 @@ Starting with **v1.7.0**, LARP-AID updates itself. When you open the app, it sil
 
 | Version | Highlights |
 |---------|-----------|
+| **v1.8.0** | 🔥 Full Fire section (GVFD/BFD) · Scene protocols · Specialized Teams · HazMat reference · Abbreviations |
 | **v1.7.0** | Auto-updates · Animal Attacks · Burns & Anaphylaxis expansion · Triage calculator upgrade |
 | **v1.6.0** | LEO overhaul · MCI alert mode · Timers tab · Notepad · Report Writer |
 | **v1.5.0** | Decision tree fixes · Report Writer improvements · MVC & cardiac scene expansion |
@@ -83,5 +85,6 @@ Starting with **v1.7.0**, LARP-AID updates itself. When you open the app, it sil
 | **Built by** | B6verly |
 | **EMS** | GVFD / BFD (Greenville & Brookmere Fire Departments) |
 | **LEO** | WSP / OCSO (Wisconsin State Patrol / Outagamie County Sheriff's Office) |
+| **Fire** | GVFD / BFD |
 | **Platform** | Windows 10/11 x64 |
 | **Download size** | ~160 MB |
