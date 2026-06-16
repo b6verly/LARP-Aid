@@ -1,6 +1,13 @@
 {
-  "version": "1.7.0",
+  "version": "1.8.0",
   "date": "June 2026",
-  "notes": ["Burns expanded", "Animal attacks added", "Anaphylaxis expanded", "Triage calculator upgraded"],
+  "notes": [
+    "Fire section added — GVFD / BFD as a full third mode",
+    "Scene protocols: Structure Fire, Vehicle Fire, Wildland, Tech Rescue, Water Rescue, SAR, HazMat",
+    "Specialized Teams tab — RIC, HazMat Team, Wildland Division, Tech Rescue, Swift Water/Dive, SAR",
+    "HazMat reference — PPE levels A–D, extinguisher classes, DOT placard classes, material profiles",
+    "Abbreviations tab — 40+ fire/HazMat terms",
+    "Nav Aids, Equipment Status tracker, Radio & Comms tab"
+  ],
   "download_url": "https://raw.githubusercontent.com/b6verly/LARP-Aid/refs/heads/main/releases/larp_aid.html"
 }
