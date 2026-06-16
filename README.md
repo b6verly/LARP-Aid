@@ -1,8 +1,6 @@
 # LARP-AID
-
 **A desktop field reference tool for EMS & LEO roles in the Greenville / Brookmere Roblox LARP.**
 Built for GVFD, BFD, WSP, and OCSO.
-
 ![Version](https://img.shields.io/badge/version-v1.7.0-58a6ff?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen?style=flat-square)
 ![Updates](https://img.shields.io/badge/auto--updates-enabled-3fb950?style=flat-square)
@@ -19,6 +17,19 @@ Built for GVFD, BFD, WSP, and OCSO.
 
 > [!WARNING]
 > The entire folder must stay together. The `.exe` cannot be moved out on its own — it needs all the other files alongside it.
+
+---
+
+## ⬆️ Upgrading from a Version Prior to v1.7.0
+
+> [!IMPORTANT]
+> Auto-updates were introduced in **v1.7.0**. If you are running **v1.6.x or earlier**, your installation cannot update itself — you must perform this one-time manual upgrade to get onto the auto-update track.
+
+1. **Delete your old LARP-AID folder** entirely (the one containing your previous `LARP-AID.exe` and its supporting files).
+2. **Go to the [Releases](../../releases) tab** and download `LarpAID-dist.zip` from the latest release.
+3. **Unzip and run** `LARP-AID.exe` from the new folder as described in the [Installation](#-installation) section above.
+
+After this one-time reinstall, all future updates will happen automatically on launch.
 
 ---
 
