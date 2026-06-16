@@ -78,8 +78,9 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 }
 .land-logo span { color: var(--color-text); }
 .land-tagline { font-size: 14px; color: var(--color-text-2); margin: 0 0 36px; text-align: center; letter-spacing: .02em; }
-.land-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 520px; margin-bottom: 28px; }
-@media (max-width: 440px) { .land-cards { grid-template-columns: 1fr; } }
+.land-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; width: 100%; max-width: 780px; margin-bottom: 28px; }
+@media (max-width: 600px) { .land-cards { grid-template-columns: 1fr; } }
+@media (max-width: 880px) and (min-width: 601px) { .land-cards { grid-template-columns: 1fr 1fr; } }
 .land-card {
   background: var(--color-bg-raised); border: 2px solid var(--color-border);
   border-radius: 16px; padding: 22px 20px; cursor: pointer;
@@ -89,12 +90,14 @@ body { background: var(--color-bg); color: var(--color-text); font-family: var(-
 .land-card:hover { transform: translateY(-2px); }
 .land-card.ems:hover { border-color: var(--c-red);  box-shadow: 0 6px 20px rgba(220,38,38,.13); }
 .land-card.leo:hover { border-color: var(--c-blue); box-shadow: 0 6px 20px rgba(37,99,235,.13); }
+.land-card.fire:hover { border-color: #EA580C; box-shadow: 0 6px 20px rgba(234,88,12,.13); }
 .land-card-icon { font-size: 32px; }
 .land-card-title { font-size: 17px; font-weight: 800; color: var(--color-text); margin: 0; letter-spacing: -.3px; }
 .land-card-sub { font-size: 12px; color: var(--color-text-2); margin: 0; line-height: 1.5; }
 .land-card-arrow { margin-top: 6px; font-size: 18px; font-weight: 700; color: var(--color-text-3); transition: transform .2s, color .2s; }
 .land-card.ems:hover .land-card-arrow { color: var(--c-red);  transform: translateX(4px); }
 .land-card.leo:hover .land-card-arrow { color: var(--c-blue); transform: translateX(4px); }
+.land-card.fire:hover .land-card-arrow { color: #EA580C; transform: translateX(4px); }
 .land-als-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--color-bg-secondary); border: 1px solid var(--color-border-2); border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--color-text-2); margin-top: 2px; }
 .als-active { color: var(--c-blue); }
 .land-settings { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; }
@@ -1087,6 +1090,12 @@ body { margin: 0; }
       <p class="land-card-sub">Penalty calculator, 10-codes, statutes, RP scripts, decision tree</p>
       <span class="land-card-arrow">&#8594;</span>
     </div>
+    <div class="land-card fire" onclick="enterApp('fire')" style="">
+      <span class="land-card-icon">🔥</span>
+      <p class="land-card-title">Fire &mdash; GVFD / BFD</p>
+      <p class="land-card-sub">Scene protocols, tech rescue, water rescue, SAR, nav aids, equipment status</p>
+      <span class="land-card-arrow" style="transition:transform .2s,color .2s;">&#8594;</span>
+    </div>
   </div>
   <div class="land-settings">
     <div style="display:flex;align-items:center;gap:8px;">
@@ -1161,6 +1170,7 @@ body { margin: 0; }
   <span class="mode-bar-label">Switch unit:</span>
   <button class="mode-btn active" id="mode-ems" onclick="switchMode('ems')">🚑 Medic / EMS</button>
   <button class="mode-btn" id="mode-leo" onclick="switchMode('leo')">🔰 LEO — OCSO / WSP</button>
+  <button class="mode-btn" id="mode-fire" onclick="switchMode('fire')">🔥 Fire — GVFD / BFD</button>
 
   <!-- ── Unit Status Board ── -->
   <div class="usb-wrap" id="unit-status-board">
@@ -3093,6 +3103,764 @@ body { margin: 0; }
 
 </div><!-- /app-leo -->
 
+<!-- ═══════════════════════════════════════════════
+     FIRE APP
+════════════════════════════════════════════════ -->
+<div id="app-fire" class="app">
+<h2 class="sr-only">GVFD / BFD Fire field guide</h2>
+
+<div class="field-search-wrap">
+  <span class="field-search-icon">🔍</span>
+  <input class="field-search" id="fire-search" type="text" placeholder="Search fire protocols, terminology…" autocomplete="off" oninput="globalSearch('fire',this.value)" />
+  <button class="field-search-clear" id="fire-search-clear" onclick="clearSearch('fire')" title="Clear">✕</button>
+</div>
+<div class="search-results" id="fire-search-results"></div>
+
+<div class="nav" id="fire-nav">
+  <button class="nav-btn active" onclick="fireTab('protocols',this)">🔥 Scene Protocols</button>
+  <button class="nav-btn" onclick="fireTab('teams',this)">🚒 Specialized Teams</button>
+  <button class="nav-btn" onclick="fireTab('navaid',this)">🧭 Nav Aids</button>
+  <button class="nav-btn" onclick="fireTab('abbrev',this)">📖 Abbreviations</button>
+  <button class="nav-btn" onclick="fireTab('equip',this)">🔧 Equipment Status</button>
+  <button class="nav-btn" onclick="fireTab('radio',this)">📻 Radio &amp; Comms</button>
+</div>
+
+<!-- FIRE: SCENE PROTOCOLS -->
+<div id="fire-protocols" class="tab visible">
+  <p class="sec-label">Scene protocols — select call type</p>
+  <div class="scene-pills">
+    <button class="spill active" onclick="fireScene('structure',this)">🏠 Structure Fire</button>
+    <button class="spill" onclick="fireScene('vehicle',this)">🚗 Vehicle Fire</button>
+    <button class="spill" onclick="fireScene('wildland',this)">🌲 Wildland / Brush</button>
+    <button class="spill" onclick="fireScene('techrescue',this)">⚙️ Tech Rescue</button>
+    <button class="spill" onclick="fireScene('waterrescue',this)">💧 Water Rescue</button>
+    <button class="spill" onclick="fireScene('sar',this)">🔍 S-A-R</button>
+    <button class="spill" onclick="fireScene('hazmat',this)">☢️ HazMat</button>
+  </div>
+
+  <!-- STRUCTURE FIRE -->
+  <div class="card scene-card vis" id="fire-sc-structure">
+    <h3>Structure fire</h3>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Size-up &amp; initial radio</strong><span>On arrival, announce: <em>"Engine 1 on scene — [address], [X]-story [structure type], showing [nothing / smoke / flames] from [side/floor]. Establishing [address] Command. Laying [in/out]."</em> Report: percent involvement, occupancy type (residential/commercial), exposures, access. Call your strategy immediately: offensive, transitional, or defensive.</span></div></div>
+    <div class="prow"><span class="picon">🧭</span><div class="ptxt"><strong>Establish divisions / sides</strong><span>Side Alpha = front (address side). Side Bravo = left facing front. Side Charlie = rear. Side Delta = right facing front. Announce sector assignments: <em>"Engine 2, take Bravo side. Ladder 1, Side Alpha — primary search."</em> All radio traffic uses Alpha/Bravo/Charlie/Delta.</span></div></div>
+
+    <div style="background:var(--color-bg-secondary);border:1.5px solid var(--color-border);border-radius:10px;padding:12px 14px;margin:10px 0;">
+      <p style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#EA580C;margin:0 0 10px;">⚔️ Fire Attack Strategy — choose one on arrival</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <!-- OFFENSIVE -->
+        <div style="background:var(--color-bg-raised);border:2px solid #059669;border-radius:8px;padding:10px 12px;">
+          <p style="font-size:12px;font-weight:800;color:#059669;margin:0 0 6px;">🟢 OFFENSIVE</p>
+          <p style="font-size:11.5px;color:var(--color-text-2);margin:0 0 6px;line-height:1.5;"><strong>When:</strong> Fire is survivable, victims may be inside, structure is sound, water is available.</p>
+          <ul style="font-size:11.5px;color:var(--color-text-2);margin:0;padding-left:16px;line-height:1.6;">
+            <li>Interior crew advances attack line directly to seat of fire</li>
+            <li>Simultaneous primary search</li>
+            <li>SCBA required — full PPE</li>
+            <li>RIC team staged and ready</li>
+            <li>Announce entry: <em>"Engine 1 going offensive, Side Alpha."</em></li>
+            <li>PAR every 10 min or at each benchmark</li>
+          </ul>
+          <p style="font-size:11px;color:#059669;font-weight:700;margin:6px 0 0;">Best chance of victim rescue. Highest crew risk.</p>
+        </div>
+
+        <!-- TRANSITIONAL -->
+        <div style="background:var(--color-bg-raised);border:2px solid #D97706;border-radius:8px;padding:10px 12px;">
+          <p style="font-size:12px;font-weight:800;color:#D97706;margin:0 0 6px;">🟡 TRANSITIONAL</p>
+          <p style="font-size:11.5px;color:var(--color-text-2);margin:0 0 6px;line-height:1.5;"><strong>When:</strong> Heavy fire condition — cool fire from exterior first, then convert to offensive for search.</p>
+          <ul style="font-size:11.5px;color:var(--color-text-2);margin:0;padding-left:16px;line-height:1.6;">
+            <li>Blitz attack: exterior master stream or 2½" to knock fire volume quickly</li>
+            <li>Do NOT make entry until fire knocked from outside</li>
+            <li>Once steam and smoke clear: switch to offensive interior ops</li>
+            <li>Announce: <em>"Engine 1 transitional — blitz attack, Side Charlie."</em></li>
+            <li>Reassess structure integrity before entry</li>
+            <li>Time-sensitive — don't stay exterior too long if victims inside</li>
+          </ul>
+          <p style="font-size:11px;color:#D97706;font-weight:700;margin:6px 0 0;">Buys time. Reduces conditions before crew entry.</p>
+        </div>
+
+        <!-- DEFENSIVE -->
+        <div style="background:var(--color-bg-raised);border:2px solid #991B1B;border-radius:8px;padding:10px 12px;">
+          <p style="font-size:12px;font-weight:800;color:#991B1B;margin:0 0 6px;">🔴 DEFENSIVE</p>
+          <p style="font-size:11.5px;color:var(--color-text-2);margin:0 0 6px;line-height:1.5;"><strong>When:</strong> Structure beyond saving, no savable victims, collapse risk, or insufficient resources.</p>
+          <ul style="font-size:11.5px;color:var(--color-text-2);margin:0;padding-left:16px;line-height:1.6;">
+            <li>ALL crews operate from exterior — no interior entry</li>
+            <li>Master streams and deck guns to suppress fire</li>
+            <li>Protect exposures (adjacent buildings)</li>
+            <li>Announce: <em>"[Address] Command going defensive — all units evacuate the structure. PAR immediately."</em></li>
+            <li>Establish collapse zone: 1.5× building height minimum</li>
+            <li>Monitor for extension to exposures</li>
+          </ul>
+          <p style="font-size:11px;color:#991B1B;font-weight:700;margin:6px 0 0;">Crew safety first. Structure is a write-off.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;padding:8px 10px;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:6px;font-size:11.5px;color:#991B1B;">
+        ⚠️ <strong>Strategy change:</strong> When converting from Offensive → Defensive, announce clearly and call PAR before any crew transitions: <em>"All units, [Address] Command — converting to defensive. All interior crews exit NOW. PAR on exit."</em>
+      </div>
+    </div>
+
+    <div class="prow"><span class="picon">🔍</span><div class="ptxt"><strong>Primary search — RECEO-VS</strong><span>Rescue first — primary search concurrent with attack line advance (offensive only). Report: <em>"Primary search complete — [all clear / victim located]."</em> Secondary search after knockdown by fresh crew. RECEO-VS: Rescue → Exposures → Confinement → Extinguishment → Overhaul → Ventilation → Salvage. Ventilation and salvage only after fire is controlled.</span></div></div>
+    <div class="prow"><span class="picon">🌬️</span><div class="ptxt"><strong>Ventilation</strong><span>Coordinate with IC before venting — uncoordinated ventilation feeds fire. Positive Pressure Ventilation (PPV): fan at door pushing air through, exhaust opening opposite. Vertical vent (roof): allows heat/smoke column to rise naturally — highest risk to crew. Horizontal vent: windows. Vent only when attack line is in position and ready to advance. Announce: <em>"Ventilation set — ready to advance."</em></span></div></div>
+    <div class="prow"><span class="picon">⚠️</span><div class="ptxt"><strong>Accountability &amp; PAR</strong><span>IC tracks all crews by division. Every crew reports entry and exit. PAR called at every tactical benchmark: <em>"All units, PAR check — Division 1, report."</em> Missing crew = immediate Mayday protocol. Incident Severity Level declared by IC based on conditions (see Abbreviations tab).</span></div></div>
+    <div class="prow"><span class="picon">🚨</span><div class="ptxt"><strong>Mayday — crew in distress</strong><span>Any firefighter activates PASS device and transmits: <em>"MAYDAY MAYDAY MAYDAY — [name/unit], [location], [what happened], [air supply status]."</em> IC declares RIC activation: <em>"All units, Mayday declared — RIC deploy to [division]. Command switching to Tactical 2."</em> All non-essential radio traffic halts.</span></div></div>
+    <div class="prow"><span class="picon">📋</span><div class="ptxt"><strong>Benchmarks to announce</strong><span>"Water on the fire." — "Fire knocked." — "Primary search complete, all clear." — "Fire under control." — "Transitioning to overhaul." — "Overhaul complete." — "Units available for reassignment." Each benchmark triggers a PAR check.</span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">Attack line (1¾")</span><span class="badge b-red">2½" for defensive</span><span class="badge b-blue">SCBA</span><span class="badge b-blue">Thermal imager</span><span class="badge b-amber">Water supply</span><span class="badge b-amber">RIC team</span></div>
+  </div>
+
+  <!-- VEHICLE FIRE -->
+  <div class="card scene-card" id="fire-sc-vehicle">
+    <h3>Vehicle fire</h3>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>On-scene report</strong><span><em>"Engine 1 on scene — [address/road], single vehicle fully involved, [occupant status]. Engine 1 establishing command. Laying in from [direction]."</em> Request LEO for traffic control immediately. Announce hazard type: gasoline, hybrid/EV, commercial vehicle with unknown cargo.</span></div></div>
+    <div class="prow"><span class="picon">⚡</span><div class="ptxt"><strong>Hybrid / EV hazards</strong><span>High-voltage battery packs may re-ignite after knockdown. Approach from side — not front or rear where battery is most common. Do NOT cut through orange high-voltage cables. If EV battery fire: massive water volume needed — may require 3,000+ gallons. Request tender if not already on scene. Contact dispatch for EV-specific response guide.</span></div></div>
+    <div class="prow"><span class="picon">💥</span><div class="ptxt"><strong>BLEVE risk — fuel tank</strong><span>Gasoline tank BLEVE possible with sustained flame impingement. Maintain 100+ ft perimeter until fire is knocked. Wheel/tire explosions can project debris 300+ ft. Fuel tank: approach from side, not directly behind vehicle. Announce: <em>"Engine 1 making approach — south side."</em></span></div></div>
+    <div class="prow"><span class="picon">🧯</span><div class="ptxt"><strong>Knockdown</strong><span>Primary attack line (1¾") — fog/straight stream depending on access. Do not open trunk until knockdown complete — potential energy release. Wheel well fires: may need to move vehicle or deflate tires (charged lines in position). Overhaul: lift hood, check battery compartment, undercarriage.</span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">1¾" attack line</span><span class="badge b-blue">SCBA</span><span class="badge b-amber">100+ ft perimeter</span><span class="badge b-amber">LEO for traffic</span></div>
+  </div>
+
+  <!-- WILDLAND / BRUSH -->
+  <div class="card scene-card" id="fire-sc-wildland">
+    <h3>Wildland / brush fire</h3>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>On-scene report — LCES first</strong><span><em>"Engine 1 on scene — [location], [acreage estimate], [fuel type], fire heading [direction], wind [speed/direction]. Establishing [location] Command."</em> Immediately establish LCES before any crew deployment: Lookout → Communications → Escape Routes → Safety Zones. Announce escape route to all crews before commitment. Give acreage estimate — even a rough one helps dispatch resources.</span></div></div>
+
+    <div class="prow"><span class="picon">🔥</span><div class="ptxt"><strong>Fire behavior — the basics that kill</strong><span>Fire runs uphill — slope doubles spread rate every 10° of steepening. Never position crews above the fire. Wind triples spread rate — wind shifts are the most common cause of firefighter fatalities. Canyons, chimneys, and saddles concentrate and accelerate fire dramatically. Head fire (burning into wind) = most dangerous. Flank (sides) and heel (rear) are safer attack positions. Spot fires ahead of the main fire mean fire is running — announce and disengage immediately.</span></div></div>
+
+    <div class="prow"><span class="picon">🌡️</span><div class="ptxt"><strong>Fuel types &amp; fire behavior</strong><span><strong>Light fuels</strong> (grass, annual weeds): ignite easily, burn fast, extinguish faster — use direct attack when practical. <strong>Medium fuels</strong> (brush, shrubs, chaparral): intense heat, spread moderately, ladder fuels that carry fire into tree crowns. <strong>Heavy fuels</strong> (logs, stumps, duff): slow ignition, long burning, deep-seated — require extensive mop-up. <strong>Crown fire</strong>: fire in tree canopy, wind-driven — extremely dangerous, near impossible to suppress directly; focus on flanks and ahead of fire. Moisture content below 10% = extreme fire behavior.</span></div></div>
+
+    <div class="prow"><span class="picon">⚔️</span><div class="ptxt"><strong>Attack methods</strong><span><strong>Direct attack</strong>: Attack fire at the edge — most effective but requires close proximity to flames. Suitable for low-intensity, early morning, light fuel fires. Use hand lines, hand tools, engines at edge. <strong>Indirect attack</strong>: Build control lines away from fire edge (fireline, dozer line, road) and burn out fuels between line and fire. Use when direct is too dangerous or intense. <strong>Parallel attack</strong>: Lines built near but not at fire edge — balance between direct and indirect. Best for moderate intensity. Announce attack method to IC: <em>"Engine 1 direct attack, north flank."</em></span></div></div>
+
+    <div class="prow"><span class="picon">🔨</span><div class="ptxt"><strong>Hand tools &amp; fireline construction</strong><span>Pulaski: combination axe/hoe — chop and scrape. McLeod: rake and hoe — scrape and clear. Shovel: dirt throwing, smothering, line construction. Combi tool: saw + hoe. Standard fireline: scrape to mineral soil, 2× the flame length wide at minimum. Mark fireline ends with flagging. Burnout: lighting fire inside control line to consume fuel — requires IC approval and wind must carry burnout into main fire.</span></div></div>
+
+    <div class="prow"><span class="picon">🚒</span><div class="ptxt"><strong>Engine operations</strong><span>Structure engines on wildland: limited offroad capability, protect tires from heat. Wildland engines (Type 3–7): high clearance, pump-and-roll capability. Pump-and-roll: apply water while vehicle moves along fire edge — most effective tool in light fuel. Never park in unburned fuel without escape route confirmed. Turn engine around before exiting — never back into fire. If overrun: shelter in place inside cab (do not run).</span></div></div>
+
+    <div class="prow"><span class="picon">🏃</span><div class="ptxt"><strong>Retreat &amp; safety zones — non-negotiable</strong><span>Safety zone: large enough for all personnel + apparatus with 30+ ft spacing. Cleared mineral soil or previously burned area preferred. NEVER use a safety zone that requires driving through the fire to reach. Announce: <em>"All units — disengage to safety zone at [location]. Escape route is [road]."</em> Fire shelter: last resort only — dig a depression if time allows, face down with feet toward fire, hold shelter down against wind. Do not run if overtaken — deploy shelter immediately.</span></div></div>
+
+    <div class="prow"><span class="picon">💧</span><div class="ptxt"><strong>Structure defense (WUI)</strong><span>Wildland-Urban Interface: clear 30 ft defensible space, close all vents/eaves/windows (ember entry point). Wet structure and roof. Leave doors unlocked. Shut off gas at meter. Set up and leave before fire arrives — do NOT shelter inside structure during fire front. Structures burning from inside out = ember intrusion. After fire front passes (2–10 min): quickly move to suppress small fires on structure. Announce when departing: <em>"Engine 1 departing [address] — structure defense complete."</em></span></div></div>
+
+    <div class="prow"><span class="picon">✈️</span><div class="ptxt"><strong>Air resources</strong><span>Airtanker (SEAT/VLAT): retardant drop to slow fire spread — gives ground crews time to build line. Not a direct suppression tool. Helicopter with bucket/tank: water drops on active flame, crew transport, recon. Announce LZ: 100×100 ft minimum, no wires overhead, wind direction flagged. Clear LZ of all personnel before aircraft arrival. Do NOT key radio within 100 ft of aircraft. All air requests through IC to air attack supervisor (ATGS).</span></div></div>
+
+    <div class="prow"><span class="picon">🌙</span><div class="ptxt"><strong>Night operations</strong><span>Fire behavior changes at night: cooler temps and higher humidity slow fire — best window for line construction. However: crew fatigue, reduced visibility, missed hazards (snags, terrain). Night attack rules: minimum two-person crews, headlamps mandatory, marked escape routes with flagging/lights, radio check every 30 min. Snags (standing dead trees) are highest night hazard — fall without warning. Announce all crew deployments to IC at night.</span></div></div>
+
+    <div class="prow"><span class="picon">🌡️</span><div class="ptxt"><strong>Red flag conditions — disengage trigger</strong><span>Red Flag Warning = weather criteria met for extreme fire behavior: temps 90°F+, relative humidity &lt;15%, sustained winds 15+ mph, or any wind gust 25+ mph. On Red Flag days: increase escape route frequency, reduce direct attack, pre-position at safety zones. IC may restrict interior operations. Spot fires during Red Flag = disengage immediately. Announce: <em>"Command — Red Flag conditions, all crews to safety zones pending IC approval to continue."</em></span></div></div>
+
+    <div style="margin-top:10px;"><span class="badge b-red">LCES established</span><span class="badge b-red">Escape route announced</span><span class="badge b-blue">Wildland PPE (nomex)</span><span class="badge b-blue">Fire shelter carried</span><span class="badge b-amber">Tender / pump-and-roll</span><span class="badge b-amber">Air support requested</span></div>
+  </div>
+
+  <!-- TECH RESCUE -->
+  <div class="card scene-card" id="fire-sc-techrescue">
+    <h3>Technical rescue</h3>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Size-up &amp; initial radio</strong><span><em>"Engine 1 on scene — [address], [rescue type: trench / confined space / structural collapse / rope], [number of victims], [access status]. Establishing command. Requesting tech rescue team to stage."</em> DO NOT enter until proper equipment and expertise on scene — rescuers become victims without proper PPE and training.</span></div></div>
+    <div class="prow"><span class="picon">🏗️</span><div class="ptxt"><strong>Structural collapse</strong><span>Announce: <em>"All units — structural collapse at [address]. Establish 200 ft collapse zone. No entry without shoring."</em> Listen for victims (silence all equipment for 30-second listen periods). Mark searched areas with chalk: "X" = no victims, "V" = victim located. Void survival theory: stairwells, under furniture, corners offer best survival voids.</span></div></div>
+    <div class="prow"><span class="picon">🕳️</span><div class="ptxt"><strong>Confined space / trench rescue</strong><span>Trench collapse: horizontal shoring required before entry. Confined space: atmospheric testing required (O2, LEL, CO, H2S) before entry. Announce gas readings to command. Confined space requires attendant at entry — do not let attendant enter. Non-permit vs permit-required space: permit spaces require written plan. Tag-in/tag-out all entries.</span></div></div>
+    <div class="prow"><span class="picon">🧗</span><div class="ptxt"><strong>Rope rescue</strong><span>High angle (70°+): load-bearing system required — minimum 2:1 mechanical advantage. Low angle/slope: tag lines and life safety rope. Anchor integrity check before loading. Patient packaging: litter with full body contact. All rigging inspected by two qualified personnel. Announce: <em>"Rope rescue system set — two anchors, 4:1 MA. Lowering on command."</em></span></div></div>
+    <div class="prow"><span class="picon">⚠️</span><div class="ptxt"><strong>Secondary collapse / secondary hazards</strong><span>All collapse scenes have secondary collapse risk for 6–12 hours. Announce vibration-producing equipment restrictions around collapse zone. Gas shutoff at street before interior operations. Electrical service cutoff by utility. Establish hot/warm/cold zones. No power tools in confined space with potential gas atmosphere.</span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">200 ft collapse zone</span><span class="badge b-red">Atmospheric monitor</span><span class="badge b-blue">Shoring equipment</span><span class="badge b-blue">SCBA</span><span class="badge b-amber">Tech rescue team</span></div>
+  </div>
+
+  <!-- WATER RESCUE -->
+  <div class="card scene-card" id="fire-sc-waterrescue">
+    <h3>Water rescue</h3>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>On-scene report &amp; reach/throw/row/go</strong><span><em>"Engine 1 on scene — [location], water rescue, [surface / swift water / ice], victim [in water / submerged]. Establishing command. Swift water team requested."</em> Response priority: Reach → Throw → Row → Go (enter as LAST resort, requires swift water certification).</span></div></div>
+    <div class="prow"><span class="picon">🌊</span><div class="ptxt"><strong>Swift water hazards</strong><span>Strainers (debris across current) trap victims underwater instantly. Foot entrapment in moving water causes drowning even in shallow water — never stand up in swift current over knee deep. Hydraulics (recirculating currents below dams or drops) re-circulate victims. Announce current speed estimate and downstream hazards to all units. No crew in swift water without swift water PPE (dry suit, PFD, helmet, knife).</span></div></div>
+    <div class="prow"><span class="picon">🧊</span><div class="ptxt"><strong>Ice rescue</strong><span>100 ft safety rope on all rescuers. Ice rescuer uses ice picks, dry suit, PFD. Throw rope first — if victim can self-rescue, do not need to send rescuer. Ice condition: clear blue ice = strongest; white/opaque = weakened. Ladder laid flat distributes weight — slide toward victim. Do not run on ice. Hypothermia protocol on extrication: cold water victims rarely show signs of life until warm — "not dead until warm and dead."</span></div></div>
+    <div class="prow"><span class="picon">🏊</span><div class="ptxt"><strong>Surface water / pond / lake</strong><span>PFD on all rescuers in or near water. Defensive swimming posture if swept in: feet downstream, on back, toes up. Boat operations: slow approach to avoid swamping victim. Announce when victim is contact-positive: <em>"Contact positive — beginning tow to [shore side]."</em> Hypothermia assessment on shore — alert EMS.</span></div></div>
+    <div class="prow"><span class="picon">🤿</span><div class="ptxt"><strong>Submerged victim</strong><span>Note submersion time — cold water increases survival window (documented cases to 90 min in cold water). Mark last seen point. Dive team request: surface water recovery vs dive recovery depends on visibility and depth. Do NOT enter murky water without dive equipment. Body recovery is non-emergency ops — crew safety always first.</span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">PFD on all rescuers</span><span class="badge b-red">Throw rope</span><span class="badge b-blue">Dry suit / PPE</span><span class="badge b-blue">Ice picks</span><span class="badge b-amber">EMS notified (hypothermia)</span></div>
+  </div>
+
+  <!-- SEARCH AND RESCUE -->
+  <div class="card scene-card" id="fire-sc-sar">
+    <h3>Search and rescue (S-A-R)</h3>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Notification &amp; initial report</strong><span><em>"Engine 1 responding — SAR activation, [location/area], missing subject: [description, last known location, time missing, terrain type]. Requesting [dog team / air support / additional ground crews]."</em> Establish Incident Command early — SAR expands fast. Time elapsed since last seen (TELS) is critical data point.</span></div></div>
+    <div class="prow"><span class="picon">📍</span><div class="ptxt"><strong>Point last seen (PLS) &amp; hasty teams</strong><span>PLS is the starting point for all search grids. Secure PLS — preserve any tracks or evidence. Hasty team: small fast team checks high probability areas first (trails, shelters, roads). Do NOT contaminate PLS with unnecessary personnel. Announce when hasty team deploys: <em>"SAR-1 hasty team deploying — north trail from PLS, radio check every 15 min."</em></span></div></div>
+    <div class="prow"><span class="picon">🗺️</span><div class="ptxt"><strong>Search sectors &amp; grid assignments</strong><span>Divide search area into sectors using map grid references or physical features. Assign each team a sector: <em>"Team Alpha — Sector 1, north of creek to old logging road."</em> Each team carries map, compass, radio, first aid. Maintain radio contact every 15 minutes. Mark searched areas on IC master map as cleared.</span></div></div>
+    <div class="prow"><span class="picon">🔦</span><div class="ptxt"><strong>Subject priority areas</strong><span>Lost persons commonly found near: water sources, trails, roads (most common), and high ground (for orientation). Children under 6: short distance from PLS, in vegetation near PLS. Elderly/dementia: follow paths of least resistance. Despondent: check elevated or secluded areas. Track these probability areas first.</span></div></div>
+    <div class="prow"><span class="picon">🚁</span><div class="ptxt"><strong>Air support &amp; night ops</strong><span>Designate LZ early: 100×100 ft minimum, obstacle-free. Announce LZ location to IC. Night ops: team headlamps required, reflective gear, GPS with waypoints. Thermal/FLIR from air — ground teams mark themselves with IR strobes or chem lights if available. Suspend ground ops in lightning or near-zero visibility — announce: <em>"Command, SAR-1 — suspending operations, returning to base for safety."</em></span></div></div>
+    <div class="prow"><span class="picon">🤝</span><div class="ptxt"><strong>Subject found — medical assessment</strong><span>Announce immediately: <em>"Subject found — [location], [condition: conscious / responsive / injured]."</em> Request EMS to staging. Stabilize before movement if injured. Hypothermia risk in all outdoor SAR — even mild weather. Do not rush extraction if injuries suspected — wait for EMS unless imminent threat to life.</span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">Radio every 15 min</span><span class="badge b-blue">Map &amp; compass</span><span class="badge b-blue">GPS with PLS waypoint</span><span class="badge b-amber">EMS notified</span><span class="badge b-amber">Air support request</span></div>
+  </div>
+
+  <!-- HAZMAT -->
+  <div class="card scene-card" id="fire-sc-hazmat">
+    <h3>HazMat response</h3>
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>On-scene report &amp; isolation</strong><span><em>"Engine 1 on scene — [address], possible HazMat. [Odor/vapor/spill/fire]. Vehicle/placard [UN number if visible from distance]. Requesting HazMat team. Isolating [ERG distance] and denying entry."</em> Do NOT approach unidentified spill or unknown odor without at minimum Level C PPE. Distance is the first defense — look up ERG initial isolation distance immediately.</span></div></div>
+    <div class="prow"><span class="picon">📖</span><div class="ptxt"><strong>Identify the material — TRACEM-P</strong><span>Use TRACEM-P mnemonic to assess hazard type: <strong>T</strong>hermal, <strong>R</strong>adiological, <strong>A</strong>sphyxiation, <strong>C</strong>hemical, <strong>E</strong>tiological (biological), <strong>M</strong>echanical, <strong>P</strong>sychological. ID sources: placard → UN number → ERG guide → MSDS/SDS on-site → CHEMTREC (1-800-424-9300). Shipping papers are in the cab of any truck. Announce material and ERG guide number to all units immediately.</span></div></div>
+    <div class="prow"><span class="picon">🟢</span><div class="ptxt"><strong>Hot / warm / cold zones</strong><span>Hot zone: contaminated/IDLH — Level A or B only, SCBA mandatory. Warm zone: decon corridor — appropriate PPE, potential splash/vapor exposure. Cold zone: CP, EMS, media, staging — no PPE required. Announce zone boundaries with landmarks: <em>"Hot zone is 300 ft radius around tanker — warm zone decon set up at north fence line."</em> Never compress zones under time pressure.</span></div></div>
+    <div class="prow"><span class="picon">🚿</span><div class="ptxt"><strong>Decontamination</strong><span>All hot zone personnel exit through decon before entering warm/cold. Emergency decon: strip outer clothing (removes ~80%), copious water flush. Technical decon: wash → rinse → wash cycle, monitor at exit. Victim decon before transport — notify hospital: <em>"Patient decontaminated, [substance], monitor for [symptoms/exposure route]."</em> Runoff is hazardous — capture if possible, notify EPA/DNR if enters storm drain.</span></div></div>
+    <div class="prow"><span class="picon">☢️</span><div class="ptxt"><strong>Radiological incidents</strong><span>Request radiation dosimetry immediately. Time/Distance/Shielding are controls: minimize time in zone, maximize distance, use shielding (vehicle, building). Alpha particles: blocked by paper/skin — ingestion/inhalation is the hazard. Beta: blocked by thin metal or plastic. Gamma: penetrating radiation — requires dense shielding (lead, concrete). Monitor personnel dose. Never exceed dose limits — rotate crews. Notify state radiological response team.</span></div></div>
+    <div class="prow"><span class="picon">🔥</span><div class="ptxt"><strong>Flammable / reactive materials</strong><span>Flammable solids: self-heating or water-reactive — do NOT apply water to metal fires (sodium, magnesium, lithium) — use Class D extinguisher or dry sand. Flammable liquids: foam suppression, do not flush into drains. Oxidizers: accelerate fire dramatically — increase hose flow and distance. Radioactive solids: handle as contamination + radiation hazard simultaneously. Cryogenic liquids: extremely cold, vapors heavier than air, displace O2 in low areas.</span></div></div>
+    <div style="margin-top:10px;"><span class="badge b-red">ERG initial isolation</span><span class="badge b-red">CHEMTREC on line</span><span class="badge b-blue">Level A/B in hot zone</span><span class="badge b-blue">Dosimetry (radiological)</span><span class="badge b-amber">HazMat team</span><span class="badge b-amber">Decon corridor set</span></div>
+  </div>
+</div>
+
+<!-- FIRE: NAV AIDS -->
+<div id="fire-navaid" class="tab">
+  <p class="sec-label">Navigational aids — phonetic alphabet, divisions &amp; sectors</p>
+
+  <p class="sec-label" style="margin-top:8px;">NATO phonetic alphabet</p>
+  <div class="codes-grid" style="margin-bottom:16px;">
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">A</span><span class="code-meaning"><strong>Alpha</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">B</span><span class="code-meaning"><strong>Bravo</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">C</span><span class="code-meaning"><strong>Charlie</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">D</span><span class="code-meaning"><strong>Delta</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">E</span><span class="code-meaning"><strong>Echo</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">F</span><span class="code-meaning"><strong>Foxtrot</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">G</span><span class="code-meaning"><strong>Golf</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">H</span><span class="code-meaning"><strong>Hotel</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">I</span><span class="code-meaning"><strong>India</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">J</span><span class="code-meaning"><strong>Juliet</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">K</span><span class="code-meaning"><strong>Kilo</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">L</span><span class="code-meaning"><strong>Lima</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">M</span><span class="code-meaning"><strong>Mike</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">N</span><span class="code-meaning"><strong>November</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">O</span><span class="code-meaning"><strong>Oscar</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">P</span><span class="code-meaning"><strong>Papa</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">Q</span><span class="code-meaning"><strong>Quebec</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">R</span><span class="code-meaning"><strong>Romeo</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">S</span><span class="code-meaning"><strong>Sierra</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">T</span><span class="code-meaning"><strong>Tango</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">U</span><span class="code-meaning"><strong>Uniform</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">V</span><span class="code-meaning"><strong>Victor</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">W</span><span class="code-meaning"><strong>Whiskey</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">X</span><span class="code-meaning"><strong>X-ray</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">Y</span><span class="code-meaning"><strong>Yankee</strong></span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;">Z</span><span class="code-meaning"><strong>Zulu</strong></span></div>
+  </div>
+
+  <hr class="divider">
+  <p class="sec-label">Structure sides — Alpha / Bravo / Charlie / Delta</p>
+  <div class="grid2" style="margin-bottom:14px;">
+    <div class="card">
+      <h3>Side reference — from street</h3>
+      <ul>
+        <li><strong>Side Alpha (A)</strong> — Front of structure, address/street side. IC typically establishes here.</li>
+        <li><strong>Side Bravo (B)</strong> — Left side when facing structure from front.</li>
+        <li><strong>Side Charlie (C)</strong> — Rear of structure.</li>
+        <li><strong>Side Delta (D)</strong> — Right side when facing structure from front.</li>
+      </ul>
+      <p style="font-size:11.5px;color:var(--color-text-2);margin-top:8px;">Memory tip: Go around the structure clockwise A → B → C → D when facing the front.</p>
+    </div>
+    <div class="card">
+      <h3>Division / Floor reference</h3>
+      <ul>
+        <li><strong>Division 1</strong> — Ground floor / 1st floor</li>
+        <li><strong>Division 2</strong> — 2nd floor</li>
+        <li><strong>Division 3</strong> — 3rd floor, and so on</li>
+        <li><strong>Roof Division</strong> — Roof operations</li>
+        <li><strong>Basement Division</strong> — Below grade</li>
+      </ul>
+      <p style="font-size:11.5px;color:var(--color-text-2);margin-top:8px;">Combine side + division for exact location: <em>"Fire in Division 2, Side Charlie."</em></p>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <p class="sec-label">Geographic / tactical sectors</p>
+  <div class="grid3">
+    <div class="card"><h3><span class="badge b-red">Hot Zone</span></h3><p style="font-size:12.5px;margin:0;">Immediately dangerous to life — IDLH atmosphere, active fire, collapse zone. Level A/B PPE + SCBA required. Entry controlled by IC only.</p></div>
+    <div class="card"><h3><span class="badge b-amber">Warm Zone</span></h3><p style="font-size:12.5px;margin:0;">Decontamination corridor. PPE required, potential exposure. Decon set up here. HazMat warm zone = full PPE but not necessarily SCBA.</p></div>
+    <div class="card"><h3><span class="badge b-green">Cold Zone</span></h3><p style="font-size:12.5px;margin:0;">Command post, EMS staging, media, public. No PPE required. Entry point for personnel and apparatus. Incident Commander typically here.</p></div>
+  </div>
+
+  <hr class="divider">
+  <p class="sec-label">Tactical benchmarks — announce these to IC</p>
+  <div class="grid2">
+    <div class="card"><h3>Fire operations</h3>
+      <ul style="font-size:12.5px;">
+        <li>"Water on the fire."</li>
+        <li>"Fire knocked / fire darkened down."</li>
+        <li>"Fire under control."</li>
+        <li>"Overhaul in progress."</li>
+        <li>"All clear — fire out."</li>
+      </ul>
+    </div>
+    <div class="card"><h3>Search &amp; rescue</h3>
+      <ul style="font-size:12.5px;">
+        <li>"Primary search initiated — [division/side]."</li>
+        <li>"Primary search complete — [all clear / victim found]."</li>
+        <li>"Secondary search initiated."</li>
+        <li>"Secondary search complete — all clear."</li>
+        <li>"Victim extricated to EMS."</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- FIRE: HAZMAT REFERENCE TAB -->
+<div id="fire-teams" class="tab">
+  <p class="sec-label">Specialized teams — select department / team</p>
+  <div class="scene-pills">
+    <button class="spill active" onclick="fireTeam('ric',this)">🧰 Rapid Intervention</button>
+    <button class="spill" onclick="fireTeam('hazmatteam',this)">☢️ HazMat Team</button>
+    <button class="spill" onclick="fireTeam('wildlandteam',this)">🌲 Wildland Division</button>
+    <button class="spill" onclick="fireTeam('techteam',this)">⚙️ Technical Rescue</button>
+    <button class="spill" onclick="fireTeam('waterteam',this)">💧 Swift Water / Dive</button>
+    <button class="spill" onclick="fireTeam('sarteam',this)">🔍 Search &amp; Rescue</button>
+  </div>
+
+  <!-- RIC / RAPID INTERVENTION CREW -->
+  <div class="card scene-card vis" id="fire-team-ric">
+    <h3>Rapid Intervention Crew (RIC)</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 12px;line-height:1.6;">The RIC (also called IRIT — Initial Rapid Intervention Team) exists for one purpose: to rescue a downed or trapped firefighter. The RIC is <strong>always staged and ready</strong> at any working interior fire. They do not take other assignments until a Mayday is declared.</p>
+
+    <div class="prow"><span class="picon">🧰</span><div class="ptxt"><strong>RIC composition &amp; staging</strong><span>Minimum two firefighters (typically three or four for large structures). Staged at command post or designated entry point — never inside the fire building. Fully dressed out in full PPE and SCBA. RIC carries dedicated rescue bag. Announce to IC: <em>"Engine 3 — RIC is established at Side Alpha, four personnel."</em> IC acknowledges and logs RIC location. RIC stays on primary radio channel — monitor all traffic.</span></div></div>
+
+    <div class="prow"><span class="picon">🎒</span><div class="ptxt"><strong>RIC bag contents</strong><span>Minimum RIC bag: extra SCBA cylinder (or airline), SCBA mask, hand light, TIC (thermal imaging camera), rope / webbing, wire cutters, door chocks, forcible entry tool (halligan), lifeline / tag line 150 ft, personal escape system. Some departments carry air monitoring equipment and medical kit. Know where every item is — you'll be using it in zero-visibility conditions.</span></div></div>
+
+    <div class="prow"><span class="picon">📻</span><div class="ptxt"><strong>Mayday received — RIC activation</strong><span>IC declares: <em>"MAYDAY declared — RIC activate. RIC enter [Side Alpha]. All other traffic hold."</em> RIC leader acknowledges: <em>"RIC copy — entering Side Alpha."</em> RIC enters with a dedicated guide rope (lifeline) from entry point. Do NOT freelance — work off the lifeline. Announce every major turn and landmark on the guide rope. IC moves all other radio traffic to Tac 2 to keep Mayday channel clear.</span></div></div>
+
+    <div class="prow"><span class="picon">🔍</span><div class="ptxt"><strong>Locating the downed firefighter</strong><span>Use TIC to scan for heat signatures. Listen for PASS device alarm (continuous tone). Call out: <em>"RIC — firefighter down, call out!"</em> Check last known location reported in Mayday. If downed FF has radio: ask for light flash, PASS activation, or sound. Search systematically — do NOT spread out without guide rope. Once located: announce immediately: <em>"RIC — firefighter located, Division 2, Side Bravo."</em></span></div></div>
+
+    <div class="prow"><span class="picon">🤝</span><div class="ptxt"><strong>Rescue &amp; packaging</strong><span>Check FF's SCBA: is regulator connected? Air supply? If air depleted: connect RIC airline or share regulator (buddy breathing only as last resort). If FF is conscious: guide out on lifeline — they walk if possible. If unconscious: use drag rescue device (DRD) on turnout coat or webbing harness. Announce movement: <em>"RIC moving victim toward Alpha — need EMS at entry."</em> Do NOT stop to do medical care inside structure — move first, treat outside.</span></div></div>
+
+    <div class="prow"><span class="picon">⚠️</span><div class="ptxt"><strong>RIC air management</strong><span>RIC must manage their own air supply carefully — two rescuers + one victim = significant air drain. Rule of air management: 1/3 in, 1/3 out, 1/3 reserve. If RIC air gets low before rescue complete: announce immediately to IC — second RIC team must be staged and ready. Never make a Mayday worse by making a second Mayday. Announce: <em>"RIC air low — need relief team to entry."</em></span></div></div>
+
+    <div class="prow"><span class="picon">🚨</span><div class="ptxt"><strong>If RIC is in distress</strong><span>RIC member transmits MAYDAY: <em>"MAYDAY MAYDAY MAYDAY — RIC team, [location], [problem], [air status]."</em> IC activates second RIC or requests mutual aid RIC immediately. This is a compounding Mayday — IC must announce to all units and reassign resources. IC does NOT send more crews into a structural collapse or imminent collapse zone — waits for structure evaluation.</span></div></div>
+
+    <div style="margin-top:10px;"><span class="badge b-red">Full PPE + SCBA</span><span class="badge b-red">RIC bag staged</span><span class="badge b-blue">TIC</span><span class="badge b-blue">Guide rope 150 ft</span><span class="badge b-amber">EMS at entry</span><span class="badge b-amber">Tac channel clear</span></div>
+  </div>
+
+  <!-- HAZMAT TEAM -->
+  <div class="card scene-card" id="fire-team-hazmatteam">
+    <h3>HazMat Team</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 12px;line-height:1.6;">The HazMat Team is a specialized unit trained to identify, contain, and mitigate chemical, biological, radiological, and flammable/reactive material incidents. First-due engines <strong>establish isolation and deny entry</strong> — they do NOT attempt mitigation without the HazMat Team on scene.</p>
+
+    <div class="prow"><span class="picon">🚒</span><div class="ptxt"><strong>First-due role (pre-HazMat team)</strong><span>Identify material from safe distance: placard, UN number, container shape. Look up ERG guide. Establish isolation perimeter per ERG initial isolation distance. Deny entry — no one in without proper PPE. Request HazMat Team through dispatch. Announce upwind/uphill staging. Notify dispatch of any exposures (people affected, drains, waterways). Document time of release estimate if known.</span></div></div>
+
+    <div class="prow"><span class="picon">🧪</span><div class="ptxt"><strong>HazMat team operations</strong><span>Team Leader conducts entry briefing: material ID, concentration, PPE level, entry objectives, time limit, decon procedure, and emergency signals. Entry team (minimum two) enters hot zone with buddy system — never solo. Monitoring team at hot zone perimeter. Decon team at warm zone exit. Safety Officer independent of entry team. All entries logged with time in and time out.</span></div></div>
+
+    <div class="prow"><span class="picon">🛡️</span><div class="ptxt"><strong>PPE selection by scenario</strong><span>Unknown material / vapor hazard / high concentration → Level A (encapsulating suit + SCBA). Liquid splash / known material at lower vapor risk → Level B (splash suit + SCBA). Known material / O₂ adequate / no vapor skin hazard → Level C (coverall + APR). Cold zone monitoring / no exposure risk → Level D (turnout gear). PPE selection is a team decision — never self-upgrade or self-downgrade without HazMat team approval.</span></div></div>
+
+    <div class="prow"><span class="picon">🚿</span><div class="ptxt"><strong>Decon operations</strong><span>Decon team runs warm zone corridor. Gross decon: emergency removal of outer clothing + water flush (for symptomatic victims — immediate). Technical decon: wash → rinse → wash (3-step minimum). Personnel decon: all entry team members decon on exit regardless of exposure. Monitor decon effectiveness with meters. Victim decon priority: ambulatory → non-ambulatory → deceased. Notify receiving hospital of substance and decon performed.</span></div></div>
+
+    <div class="prow"><span class="picon">☢️</span><div class="ptxt"><strong>Radiological response</strong><span>Radiation control officer notified immediately. Issue dosimetry to all personnel. Entry dose limits set before any hot zone entry. Rotate crews to manage dose. Alpha/Beta: contamination control, full body covering. Gamma: distance is primary control — every doubling of distance reduces exposure by 75%. Radioactive material transport incidents: do NOT move shipping container — call carrier and NRC. Notify state emergency management for any radiological release.</span></div></div>
+
+    <div style="margin-top:10px;"><span class="badge b-red">ERG isolation distance</span><span class="badge b-red">CHEMTREC: 1-800-424-9300</span><span class="badge b-blue">Level A/B/C per scenario</span><span class="badge b-blue">Dosimetry (radiological)</span><span class="badge b-amber">Decon corridor set</span></div>
+  </div>
+
+  <!-- WILDLAND DIVISION -->
+  <div class="card scene-card" id="fire-team-wildlandteam">
+    <h3>Wildland Division</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 12px;line-height:1.6;">The Wildland Division operates under a separate set of standards from structural firefighting. Crew certification levels, PPE requirements, and tactical rules differ significantly. LCES is always the first priority — without it, no crew deployment.</p>
+
+    <div class="prow"><span class="picon">👔</span><div class="ptxt"><strong>Crew types</strong><span><strong>Type 1 crew (Hotshots)</strong>: 20-person highly trained crews for direct/indirect attack on most dangerous terrain — 40-hour standard work week on fire, national deployment. <strong>Type 2 crew</strong>: 20-person crews for general line construction, not as high-intensity. <strong>Engine crew</strong>: Structure or wildland engines (Type 3–7) — pump-and-roll, structure protection, mop-up. <strong>Helicopter crew</strong>: Fast transport, initial attack, aerial ignition. For in-game: announce crew type when deployed.</span></div></div>
+
+    <div class="prow"><span class="picon">👷</span><div class="ptxt"><strong>Wildland PPE (differs from structural)</strong><span>Nomex shirt and pants (flame-resistant, not fire-proof). Leather boots — 8-inch minimum, lug sole. Hard hat. Gloves. Goggles. Fire shelter (carried, not worn). Chainsaw operators: additional chaps, face shield. NO structural turnout gear for wildland work — it traps heat and causes heat stroke in hot weather operations. SCBA generally not used except at HazMat component of wildland fire (structures, vehicles).</span></div></div>
+
+    <div class="prow"><span class="picon">📡</span><div class="ptxt"><strong>ICS on wildland fires</strong><span>Large wildland fires use full ICS: Operations, Planning, Logistics, Finance/Admin under IC. Operations manages divisions (geographic) and groups (functional). Air Operations Branch for all aviation. Plans Section tracks fire perimeter, weather, and resources. Staging Area for incoming resources. For multi-day fires: IC transfers to Incident Management Team (IMT). All radio traffic uses ICS titles not names: <em>"Division Alpha Supervisor, Operations."</em></span></div></div>
+
+    <div class="prow"><span class="picon">🌬️</span><div class="ptxt"><strong>Weather &amp; spot weather</strong><span>Request Spot Weather Forecast from NWS through IC for large fires — gives site-specific wind, humidity, and temperature. Monitor wind shifts constantly — unannounced wind shifts cause most burnover fatalities. Relative humidity recovery at night is critical for mop-up safety. Inversion: cooler air trapping smoke near ground — can cause sudden visibility and air quality issues for crews. Fire weather watch vs Red Flag Warning: Watch = conditions developing; Warning = conditions exist NOW.</span></div></div>
+
+    <div style="margin-top:10px;"><span class="badge b-red">LCES before deployment</span><span class="badge b-red">Fire shelter on person</span><span class="badge b-blue">Nomex PPE</span><span class="badge b-blue">Spot weather requested</span><span class="badge b-amber">Escape route flagged</span></div>
+  </div>
+
+  <!-- TECHNICAL RESCUE TEAM -->
+  <div class="card scene-card" id="fire-team-techteam">
+    <h3>Technical Rescue Team</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 12px;line-height:1.6;">Technical rescue requires specialized training and equipment beyond standard firefighting. First-due companies <strong>isolate and deny entry</strong>, establish scene safety, and request the tech rescue team. Do not attempt entry into a trench, confined space, or collapsed structure without trained personnel and proper equipment.</p>
+
+    <div class="prow"><span class="picon">🏗️</span><div class="ptxt"><strong>Structural collapse team</strong><span>Collapse zone established immediately: 1.5× building height minimum. No entry without shoring plan. Victim location: call out, listen (silence all equipment — 30-second listen periods), use search cameras, victim location device (seismic or acoustic). Mark void spaces. USAR (Urban Search and Rescue) teams for multi-story collapse. Shoring: vertical, horizontal, and cross-bracing before crew entry into collapse zone. Wood cribbing: build platforms, not just stacks.</span></div></div>
+
+    <div class="prow"><span class="picon">🕳️</span><div class="ptxt"><strong>Confined space rescue</strong><span>Atmospheric test before any entry: O₂ (19.5–23.5% safe), LEL (&lt;10% safe), CO (&lt;25 ppm safe), H₂S (&lt;1 ppm safe). Permit-required confined space: written entry permit, attendant at entry point, rescue procedures pre-planned. Attendant NEVER enters — call additional resources. Attendant duties: monitor entrant, maintain communication, track entry time, initiate rescue if needed. Ventilate continuously during entry if possible.</span></div></div>
+
+    <div class="prow"><span class="picon">🧗</span><div class="ptxt"><strong>Rope rescue team</strong><span>All life safety systems: minimum 15:1 safety factor for life safety loads. Two separate anchor systems (primary + belay). Mechanical advantage systems: 3:1 (Z-rig), 4:1 (drop loop), 6:1 (piggyback). Litter rigging: patient secured with full-body contact, head-end elevated 15–30° for most rescues. Edge protection: all rope running over edges needs padding. Announce system status: <em>"Rigging complete, two anchors, 4:1 MA, loaded — ready to lower on command."</em></span></div></div>
+
+    <div class="prow"><span class="picon">🚗</span><div class="ptxt"><strong>Vehicle extrication</strong><span>Stabilize vehicle first — cribbing, step chocks, struts for rollovers. Disable vehicle: ignition off, key removed, battery disconnect (hybrid: also manual disconnect for HV system). Glass management: side windows preferred entry — tempered glass. Windshield is laminated — cut and fold. Roof removal (total roof removal or B-post cut and fold). Dash displacement for pedal entrapment. Announce each step to medical team. Do NOT rush — patient management runs parallel with extrication.</span></div></div>
+
+    <div style="margin-top:10px;"><span class="badge b-red">Collapse zone 1.5× height</span><span class="badge b-red">Atmospheric monitor</span><span class="badge b-blue">Shoring equipment</span><span class="badge b-blue">Rope system (15:1 SF)</span><span class="badge b-amber">Tech rescue team on scene</span></div>
+  </div>
+
+  <!-- SWIFT WATER / DIVE -->
+  <div class="card scene-card" id="fire-team-waterteam">
+    <h3>Swift Water / Dive Team</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 12px;line-height:1.6;">Water rescue has four levels of response: Reach → Throw → Row → Go. Swift water certification is required before any in-water entry. Untrained entry into swift water creates two victims. The water team manages active rescue; dive team handles submerged recovery.</p>
+
+    <div class="prow"><span class="picon">🌊</span><div class="ptxt"><strong>Swift water team operations</strong><span>Team positions: upstream lookout (spotter for approaching hazards), downstream safety (throw rope and catch swimmer), and entry team (if entering water). PFD (life jacket), helmet, wetsuit or drysuit depending on water temp, knife for entanglement, whistle. River features to ID: strainers (deadly — debris trapping), hydraulics/holes (recirculating below drops), pillows (water building against object), eddies (calm water behind obstruction — use for crew staging). Never stand in moving water above knee depth — foot entrapment.</span></div></div>
+
+    <div class="prow"><span class="picon">🤿</span><div class="ptxt"><strong>Dive team operations</strong><span>Dive team activated for submerged victim, submerged vehicle, or underwater recovery. Dive supervisor manages all dive ops from surface. Tethered diving preferred in low visibility — diver connected to surface by lifeline with signal pulls: 1 pull = stop, 2 = come up, 3 = OK, 4 rapid = emergency. Never dive alone. Dive log: diver name, time in, depth, time out, bottom conditions. Cold water extends victim survival window significantly — continue rescue until confirmed. Body recovery operations are non-emergency — no rushing.</span></div></div>
+
+    <div class="prow"><span class="picon">🧊</span><div class="ptxt"><strong>Ice rescue team</strong><span>Ice rescue requires drysuits, ice picks (self-rescue tools), and safety lines. Ladder on ice: horizontal approach distributes weight. Approach prone — do not stand. Victim packaging on ice: slide victim onto backboard or rescue sled, keep horizontal. Ice strength: clear blue ice = strongest (2" supports adult). White/grey/opaque = weakened, layered, or spring ice — stay off. Shore-based rescue first: throw rope, reach with ladder or pole. Never send rescuers onto ice that has already failed (victim fell through).</span></div></div>
+
+    <div style="margin-top:10px;"><span class="badge b-red">PFD mandatory</span><span class="badge b-red">Throw rope staged</span><span class="badge b-blue">Drysuit / wetsuit</span><span class="badge b-blue">Tethered dive</span><span class="badge b-amber">Downstream safety set</span></div>
+  </div>
+
+  <!-- SAR TEAM -->
+  <div class="card scene-card" id="fire-team-sarteam">
+    <h3>Search &amp; Rescue Team (SAR)</h3>
+    <p style="font-size:12px;color:var(--color-text-2);margin:0 0 12px;line-height:1.6;">SAR is coordinated through Incident Command with law enforcement typically taking lead on missing person cases. Fire SAR teams provide ground search, medical support, and technical rescue capability. Time is critical — most lost person survivability drops sharply after 24 hours in adverse conditions.</p>
+
+    <div class="prow"><span class="picon">🐕</span><div class="ptxt"><strong>K9 search teams</strong><span>Trailing dogs: follow specific scent trail from last known point — need uncontaminated scent article and PLS. Area search dogs: detect human scent in a defined area — best for unknown location. Cadaver dogs: locate deceased subjects. K9 team works best early — contamination from searchers degrades scent trail quickly. Keep all non-essential personnel out of PLS. Announce all K9 deployments to IC. K9 handler makes all decisions about their dog — do not give K9 handlers tactical assignments without their input.</span></div></div>
+
+    <div class="prow"><span class="picon">🗺️</span><div class="ptxt"><strong>Probability analysis</strong><span>Lost Person Behavior (LPB) guides search priorities by subject type: <strong>Hiker</strong>: follows trail, goes downhill, finds water. <strong>Child &lt;6</strong>: short distance from PLS, attracted to machinery/light, hides from searchers. <strong>Dementia</strong>: path of least resistance, rarely calls out. <strong>Despondent</strong>: intentionally hidden, elevated or near water. <strong>Hunter</strong>: near vehicle, downhill, near drainage. Map probability areas before deploying teams. High probability areas get hasty teams first; systematic grid search follows.</span></div></div>
+
+    <div class="prow"><span class="picon">🏥</span><div class="ptxt"><strong>Medical considerations</strong><span>All SAR finds assume hypothermia risk regardless of air temperature — wet + wind = rapid heat loss. Handle hypothermic victims gently — cardiac dysrhythmia from sudden movement. Do not give alcohol or rub extremities. Horizontal carry preferred. Dehydration and hypoglycemia common in prolonged missing events. Trauma from fall is always possible. Request EMS to staging early — they can be released if not needed, but cannot respond instantly if called late.</span></div></div>
+
+    <div style="margin-top:10px;"><span class="badge b-red">PLS secured (uncontaminated)</span><span class="badge b-blue">K9 team requested</span><span class="badge b-blue">GPS + map</span><span class="badge b-amber">EMS staged</span><span class="badge b-amber">Radio check every 15 min</span></div>
+  </div>
+
+</div><!-- /fire-teams -->
+
+<!-- FIRE HAZMAT REFERENCE TAB — kept as reference, not a team tab -->
+<div id="fire-hazmat" class="tab">
+  <p class="sec-label">HazMat reference — PPE levels, materials, extinguishers, placard classes</p>
+
+  <!-- EPA/OSHA PPE LEVELS -->
+  <p class="sec-label" style="margin-top:4px;">EPA / OSHA Protection Levels</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div class="card" style="border-top:4px solid #991B1B;">
+      <h3 style="color:#991B1B;">Level A</h3>
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-2);margin:0 0 6px;">Highest Protection</p>
+      <ul style="font-size:11.5px;margin:0;padding-left:14px;line-height:1.7;">
+        <li>Fully encapsulating, vapor-tight chemical suit</li>
+        <li>SCBA (worn inside suit)</li>
+        <li>Double chemical-resistant gloves</li>
+        <li>Chemical-resistant boots</li>
+      </ul>
+      <p style="font-size:11px;color:#991B1B;font-weight:700;margin:8px 0 0;">Use when: highest vapor/gas/splash hazard, unknown atmosphere, IDLH confirmed</p>
+    </div>
+    <div class="card" style="border-top:4px solid #EA580C;">
+      <h3 style="color:#EA580C;">Level B</h3>
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-2);margin:0 0 6px;">High Protection</p>
+      <ul style="font-size:11.5px;margin:0;padding-left:14px;line-height:1.7;">
+        <li>Non-encapsulating chemical suit (splash-resistant, NOT vapor-tight)</li>
+        <li>SCBA (worn outside suit)</li>
+        <li>Chemical-resistant gloves (inner + outer)</li>
+        <li>Chemical-resistant boots</li>
+      </ul>
+      <p style="font-size:11px;color:#EA580C;font-weight:700;margin:8px 0 0;">Use when: atmosphere IDLH but vapor skin hazard lower than Level A; liquid splash possible</p>
+    </div>
+    <div class="card" style="border-top:4px solid #D97706;">
+      <h3 style="color:#D97706;">Level C</h3>
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-2);margin:0 0 6px;">Moderate Protection</p>
+      <ul style="font-size:11.5px;margin:0;padding-left:14px;line-height:1.7;">
+        <li>Chemical-resistant suit (Tyvek or similar)</li>
+        <li>Air-purifying respirator (APR/PAPR) — NOT SCBA</li>
+        <li>Chemical-resistant gloves</li>
+        <li>Chemical-resistant boots</li>
+      </ul>
+      <p style="font-size:11px;color:#D97706;font-weight:700;margin:8px 0 0;">Use when: O2 adequate (&gt;19.5%), contaminant identified, APR cartridge available, no splash expected</p>
+    </div>
+    <div class="card" style="border-top:4px solid #059669;">
+      <h3 style="color:#059669;">Level D</h3>
+      <p style="font-size:11px;font-weight:700;color:var(--color-text-2);margin:0 0 6px;">Minimal Protection</p>
+      <ul style="font-size:11.5px;margin:0;padding-left:14px;line-height:1.7;">
+        <li>Standard work uniform / turnout gear</li>
+        <li>No respiratory protection beyond dust mask</li>
+        <li>Safety glasses, boots</li>
+      </ul>
+      <p style="font-size:11px;color:#059669;font-weight:700;margin:8px 0 0;">Use when: atmosphere not hazardous, no splash/contact possible — cold zone only</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- FIRE EXTINGUISHER CLASSES -->
+  <p class="sec-label">Fire Extinguisher Classes</p>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;">
+    <div class="card" style="border-top:4px solid #059669;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#059669;font-family:monospace;">A</div>
+      <p style="font-size:12px;font-weight:800;margin:4px 0;">Ordinary Combustibles</p>
+      <p style="font-size:11.5px;color:var(--color-text-2);margin:0;">Wood, paper, cloth, rubber, most plastics</p>
+      <p style="font-size:11px;color:#059669;font-weight:700;margin:6px 0 0;">Agent: Water, foam, dry chemical (ABC), CO₂</p>
+    </div>
+    <div class="card" style="border-top:4px solid #EA580C;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#EA580C;font-family:monospace;">B</div>
+      <p style="font-size:12px;font-weight:800;margin:4px 0;">Flammable Liquids &amp; Gases</p>
+      <p style="font-size:11.5px;color:var(--color-text-2);margin:0;">Gasoline, oil, grease, paint, propane, acetylene</p>
+      <p style="font-size:11px;color:#EA580C;font-weight:700;margin:6px 0 0;">Agent: Foam, dry chemical (ABC/BC), CO₂, Halon</p>
+    </div>
+    <div class="card" style="border-top:4px solid #2563EB;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#2563EB;font-family:monospace;">C</div>
+      <p style="font-size:12px;font-weight:800;margin:4px 0;">Energized Electrical</p>
+      <p style="font-size:11.5px;color:var(--color-text-2);margin:0;">Wiring, panels, motors, appliances — live circuits</p>
+      <p style="font-size:11px;color:#2563EB;font-weight:700;margin:6px 0 0;">Agent: CO₂, dry chemical (ABC/BC), Halon — NEVER water or foam</p>
+    </div>
+    <div class="card" style="border-top:4px solid #7C3AED;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#7C3AED;font-family:monospace;">D</div>
+      <p style="font-size:12px;font-weight:800;margin:4px 0;">Combustible Metals</p>
+      <p style="font-size:11.5px;color:var(--color-text-2);margin:0;">Magnesium, sodium, titanium, lithium, potassium</p>
+      <p style="font-size:11px;color:#7C3AED;font-weight:700;margin:6px 0 0;">Agent: Dry powder (Metal-X, Lith-X) ONLY — water causes violent reaction</p>
+    </div>
+    <div class="card" style="border-top:4px solid #991B1B;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#991B1B;font-family:monospace;">K</div>
+      <p style="font-size:12px;font-weight:800;margin:4px 0;">Cooking Oils &amp; Fats</p>
+      <p style="font-size:11.5px;color:var(--color-text-2);margin:0;">Deep fryers, cooking oils, animal/vegetable fats</p>
+      <p style="font-size:11px;color:#991B1B;font-weight:700;margin:6px 0 0;">Agent: Wet chemical only. Do NOT use water — causes grease explosion</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- DOT HAZMAT PLACARD CLASSES -->
+  <p class="sec-label">DOT HazMat Placard Classes</p>
+  <div class="codes-grid" style="margin-bottom:16px;">
+    <div class="code-row"><span class="code-num" style="background:#991B1B;">Class 1</span><span class="code-meaning"><strong>Explosives</strong> — Divisions 1.1 (mass explosion) through 1.6 (extremely insensitive). Orange placard with explosion symbol.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;">Class 2</span><span class="code-meaning"><strong>Gases</strong> — 2.1 Flammable gas (propane/hydrogen), 2.2 Non-flammable compressed gas, 2.3 Toxic/poison gas. Stage upwind and uphill.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#D97706;">Class 3</span><span class="code-meaning"><strong>Flammable Liquids</strong> — Gasoline, diesel, ethanol, acetone. Red diamond. Flashpoint below 140°F (60°C).</span></div>
+    <div class="code-row"><span class="code-num" style="background:#D97706;">Class 4</span><span class="code-meaning"><strong>Flammable Solids</strong> — 4.1 Flammable solid, 4.2 Spontaneously combustible, 4.3 Dangerous when wet (reacts with water). DO NOT use water on Class 4.3.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;">Class 5</span><span class="code-meaning"><strong>Oxidizers &amp; Organic Peroxides</strong> — 5.1 Oxidizer (increases fire intensity), 5.2 Organic peroxide (heat/shock sensitive). Yellow placard.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;">Class 6</span><span class="code-meaning"><strong>Toxic / Infectious</strong> — 6.1 Poison/toxic material (pesticides, cyanide), 6.2 Infectious substance (biological). Full Level A consideration.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;">Class 7</span><span class="code-meaning"><strong>Radioactive</strong> — White-I (surface &lt;0.5 mR/hr), Yellow-II, Yellow-III. Contact radiation control officer immediately. Time/Distance/Shielding.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#1E40AF;">Class 8</span><span class="code-meaning"><strong>Corrosives</strong> — Acids (sulfuric, hydrochloric) and bases (sodium hydroxide). Black and white placard. Causes tissue destruction on contact.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#475569;">Class 9</span><span class="code-meaning"><strong>Miscellaneous Dangerous Goods</strong> — Dry ice (CO₂), lithium batteries, environmentally hazardous substances, elevated temperature materials.</span></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- COMMON HAZMAT MATERIALS -->
+  <p class="sec-label">Common HazMat Materials — quick reference</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div class="card">
+      <h3>Ammonia (NH₃) — Class 2.3</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Toxic gas, flammable (15–28% in air), corrosive</li>
+        <li><strong>Odor:</strong> Pungent — detectable at 5 ppm (IDLH = 300 ppm)</li>
+        <li><strong>PPE:</strong> Level A for spill/leak; Level B if concentration known low</li>
+        <li><strong>Action:</strong> Evacuate downwind, fog water spray to knock vapors (do not flood)</li>
+        <li><strong>Common source:</strong> Refrigeration systems, fertilizer</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Chlorine (Cl₂) — Class 2.3</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Highly toxic gas, heavier than air (pools in low areas), corrosive</li>
+        <li><strong>Odor:</strong> Sharp bleach-like (IDLH = 10 ppm)</li>
+        <li><strong>PPE:</strong> Level A — no exceptions for confirmed chlorine</li>
+        <li><strong>Action:</strong> Large isolation distance, downwind evacuation; water fog reduces vapor cloud</li>
+        <li><strong>Common source:</strong> Water treatment, pool chemicals, tanker trucks</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Propane / LPG — Class 2.1</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Flammable gas (2.1–9.5% LEL), heavier than air, BLEVE risk</li>
+        <li><strong>PPE:</strong> Full structural PPE + SCBA; no sparks or flame sources</li>
+        <li><strong>Action:</strong> Shut supply if safe, cool tank with water (do NOT extinguish leak without stopping flow), evacuate 1000 ft if BLEVE risk</li>
+        <li><strong>Common source:</strong> Tanks, cylinders, vehicles, homes</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Gasoline / Diesel — Class 3</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Flammable liquid, vapors heavier than air, long ignition range</li>
+        <li><strong>PPE:</strong> Structural PPE + SCBA</li>
+        <li><strong>Action:</strong> Eliminate ignition sources, foam suppression for fires, absorbent for spills; prevent runoff to drains</li>
+        <li><strong>Common source:</strong> Tanker trucks, underground storage tanks, vehicles</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Sodium / Potassium — Class 4.3</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Reacts violently with water — produces hydrogen gas and intense heat</li>
+        <li><strong>PPE:</strong> Level A for spill</li>
+        <li><strong>Action:</strong> NEVER apply water. Use dry sand, Class D extinguisher, or smother. Isolate from all moisture sources.</li>
+        <li><strong>Common source:</strong> Chemical plants, laboratories</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Sulfuric Acid — Class 8</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Highly corrosive, exothermic reaction with water, releases toxic SO₂ vapor</li>
+        <li><strong>PPE:</strong> Level A for concentrated acid; Level B/C for dilute</li>
+        <li><strong>Action:</strong> Dilute with large volumes of water (add water to area, not acid to water); contain runoff; neutralize with baking soda if needed</li>
+        <li><strong>Common source:</strong> Batteries, industrial processes, tanker trucks</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Carbon Monoxide (CO) — Class 2.3</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Colorless, odorless, highly toxic (IDLH = 1,200 ppm), flammable</li>
+        <li><strong>PPE:</strong> SCBA mandatory — CO passes through APR cartridges</li>
+        <li><strong>Action:</strong> Ventilate immediately, remove all occupants, monitor atmosphere before re-entry</li>
+        <li><strong>Common source:</strong> Vehicle exhaust, generators, heating systems, structure fires</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Lithium Batteries — Class 9</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li><strong>Hazard:</strong> Thermal runaway — fire may re-ignite hours/days after knockdown; toxic smoke (HF gas from EV batteries)</li>
+        <li><strong>PPE:</strong> SCBA, structural PPE</li>
+        <li><strong>Action:</strong> Massive water volume for suppression; do not attempt to move burning EV; isolate and monitor for re-ignition; notify disposal unit</li>
+        <li><strong>Common source:</strong> Electric vehicles, e-bikes, phones, power tools, energy storage</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- INCIDENT SEVERITY LEVELS -->
+  <p class="sec-label">Incident Severity Levels — Fire Ground</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+    <div class="card" style="border-left:4px solid #059669;">
+      <h3><span class="badge b-green">Level 1</span> Routine</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li>Controlled with on-scene resources</li>
+        <li>Single or double alarm</li>
+        <li>No special teams needed</li>
+        <li>Examples: car fire, dumpster fire, minor structure fire, small HazMat spill</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:4px solid #D97706;">
+      <h3><span class="badge b-amber">Level 2</span> Elevated</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li>Additional resources required — mutual aid requested</li>
+        <li>Multiple alarms</li>
+        <li>Technical teams may be needed (HazMat, rescue)</li>
+        <li>Examples: working structure fire, multi-vehicle accident with entrapment, significant HazMat release</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:4px solid #991B1B;">
+      <h3><span class="badge b-red">Level 3</span> Major Incident</h3>
+      <ul style="font-size:11.5px;line-height:1.7;margin:0;padding-left:14px;">
+        <li>Regional / state resources required</li>
+        <li>Full ICS activation</li>
+        <li>EOC may be activated</li>
+        <li>Examples: large commercial fire, Mayday with entrapment, mass casualty HazMat, wildland-urban interface fire</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ALARM LEVELS -->
+  <p class="sec-label">Alarm Levels</p>
+  <div class="codes-grid" style="margin-bottom:16px;">
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">1st ALARM</span><span class="code-meaning">Initial response — typical assignment of engines, ladder, battalion chief</span></div>
+    <div class="code-row"><span class="code-num" style="background:#D97706;font-size:10px;padding:0 6px;">2nd ALARM</span><span class="code-meaning">Additional apparatus from same or neighboring stations — working fire confirmed</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">3rd ALARM</span><span class="code-meaning">Mutual aid from neighboring departments — significant incident</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">GENERAL ALARM</span><span class="code-meaning">All available resources in region — major incident, all off-duty recalled</span></div>
+  </div>
+</div>
+
+
+<!-- FIRE: ABBREVIATIONS TAB -->
+<div id="fire-abbrev" class="tab">
+  <p class="sec-label">Fire &amp; HazMat abbreviations — quick reference</p>
+
+  <p class="sec-label" style="margin-top:4px;">Operations &amp; Tactics</p>
+  <div class="codes-grid" style="margin-bottom:14px;">
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">IC</span><span class="code-meaning"><strong>Incident Commander</strong> — overall scene authority under ICS</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">ICS</span><span class="code-meaning"><strong>Incident Command System</strong> — standardized management structure (NIMS)</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">NIMS</span><span class="code-meaning"><strong>National Incident Management System</strong> — federal framework for emergency response</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">PAR</span><span class="code-meaning"><strong>Personnel Accountability Report</strong> — headcount of all crews by division</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">RIC</span><span class="code-meaning"><strong>Rapid Intervention Crew</strong> — dedicated team staged to rescue downed firefighters</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">IRIT</span><span class="code-meaning"><strong>Initial Rapid Intervention Team</strong> — same as RIC in some departments</span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;font-size:10px;padding:0 6px;">RECEO-VS</span><span class="code-meaning"><strong>Rescue, Exposures, Confinement, Extinguishment, Overhaul, Ventilation, Salvage</strong> — fire attack priority order</span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;font-size:10px;padding:0 6px;">PPV</span><span class="code-meaning"><strong>Positive Pressure Ventilation</strong> — fan forces fresh air in, smoke/heat exits opposite opening</span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;font-size:10px;padding:0 6px;">NPV</span><span class="code-meaning"><strong>Negative Pressure Ventilation</strong> — fan draws smoke out of structure</span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;font-size:10px;padding:0 6px;">TIC / TIU</span><span class="code-meaning"><strong>Thermal Imaging Camera / Unit</strong> — detects heat signatures through smoke</span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;font-size:10px;padding:0 6px;">PASS</span><span class="code-meaning"><strong>Personal Alert Safety System</strong> — sounds alarm if firefighter is motionless; activate on Mayday</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">LDH</span><span class="code-meaning"><strong>Large Diameter Hose</strong> — 4" or 5" supply line from hydrant to engine</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">MDH</span><span class="code-meaning"><strong>Medium Diameter Hose</strong> — 2½" attack or supply line</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">SDH</span><span class="code-meaning"><strong>Small Diameter Hose</strong> — 1¾" primary attack line for residential</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">GPM</span><span class="code-meaning"><strong>Gallons Per Minute</strong> — water flow rate. 1¾" = ~150 GPM; 2½" = ~250 GPM; master stream = 500–1000+ GPM</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">EOC</span><span class="code-meaning"><strong>Emergency Operations Center</strong> — activated for large-scale or prolonged incidents</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">AHJ</span><span class="code-meaning"><strong>Authority Having Jurisdiction</strong> — entity responsible for enforcing codes and regulations</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">LOD</span><span class="code-meaning"><strong>Line of Duty</strong> — as in LOD injury or LOD death (LODD)</span></div>
+  </div>
+
+  <p class="sec-label">HazMat Specific</p>
+  <div class="codes-grid" style="margin-bottom:14px;">
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">ERG</span><span class="code-meaning"><strong>Emergency Response Guidebook</strong> — DOT/Transport Canada publication; lookup by UN number or material name</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">SDS / MSDS</span><span class="code-meaning"><strong>Safety Data Sheet / Material Safety Data Sheet</strong> — product hazard information sheet</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">UN #</span><span class="code-meaning"><strong>United Nations Number</strong> — 4-digit ID on placards (e.g. 1203 = gasoline, 1017 = chlorine)</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">IDLH</span><span class="code-meaning"><strong>Immediately Dangerous to Life or Health</strong> — atmospheric concentration requiring immediate escape without PPE</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">LEL</span><span class="code-meaning"><strong>Lower Explosive Limit</strong> — minimum concentration of gas in air to ignite; below LEL = too lean to burn</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">UEL</span><span class="code-meaning"><strong>Upper Explosive Limit</strong> — maximum concentration to ignite; above UEL = too rich to burn (but toxic)</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">PPM</span><span class="code-meaning"><strong>Parts Per Million</strong> — concentration unit for gases/vapors in atmosphere</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">PEL</span><span class="code-meaning"><strong>Permissible Exposure Limit</strong> — OSHA's max safe exposure over 8-hour workday</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">TLV</span><span class="code-meaning"><strong>Threshold Limit Value</strong> — ACGIH's daily exposure guideline (usually more protective than PEL)</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">CHEMTREC</span><span class="code-meaning"><strong>Chemical Transportation Emergency Center</strong> — 1-800-424-9300, 24/7 chemical emergency hotline</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">TRACEM-P</span><span class="code-meaning"><strong>Thermal / Radiological / Asphyxiation / Chemical / Etiological / Mechanical / Psychological</strong> — hazard assessment mnemonic</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">BLEVE</span><span class="code-meaning"><strong>Boiling Liquid Expanding Vapor Explosion</strong> — pressurized tank rupture; can project tank 1,000+ ft</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">SCBA</span><span class="code-meaning"><strong>Self-Contained Breathing Apparatus</strong> — positive-pressure air supply; required in IDLH and hot zone</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">APR</span><span class="code-meaning"><strong>Air-Purifying Respirator</strong> — filters ambient air; NOT for IDLH or O₂-deficient atmospheres (Level C only)</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">PAPR</span><span class="code-meaning"><strong>Powered Air-Purifying Respirator</strong> — motorized APR; positive pressure inside facepiece</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">EPA</span><span class="code-meaning"><strong>Environmental Protection Agency</strong> — regulates HazMat response, PPE levels A–D, and environmental reporting</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">OSHA</span><span class="code-meaning"><strong>Occupational Safety &amp; Health Administration</strong> — 29 CFR 1910.120 governs HazWoper training requirements</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">HazWoper</span><span class="code-meaning"><strong>Hazardous Waste Operations &amp; Emergency Response</strong> — OSHA standard for HazMat responders; 8-hr to 40-hr training levels</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">CERCLA</span><span class="code-meaning"><strong>Comprehensive Environmental Response, Compensation &amp; Liability Act</strong> — "Superfund" law; requires HazMat spill reporting</span></div>
+  </div>
+
+  <p class="sec-label">Radiological</p>
+  <div class="codes-grid" style="margin-bottom:14px;">
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">mR/hr</span><span class="code-meaning"><strong>Milliröntgen per hour</strong> — radiation exposure rate unit for gamma/X-ray</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">rem / mrem</span><span class="code-meaning"><strong>Röntgen Equivalent Man</strong> — absorbed radiation dose adjusted for biological effect</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">RAD</span><span class="code-meaning"><strong>Radiation Absorbed Dose</strong> — 100 erg of energy absorbed per gram of tissue</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">Alpha (α)</span><span class="code-meaning">Low penetration — blocked by skin or paper. Hazard only if inhaled/ingested. Wear N95 minimum.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">Beta (β)</span><span class="code-meaning">Moderate penetration — blocked by plastic/glass/thin metal. Can cause skin burns. Wear full PPE.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">Gamma (γ)</span><span class="code-meaning">High penetration — requires lead or dense concrete shielding. Whole-body exposure risk. Distance critical.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">TDS</span><span class="code-meaning"><strong>Time / Distance / Shielding</strong> — three controls for radiological exposure: minimize time, maximize distance, use shielding</span></div>
+  </div>
+
+  <p class="sec-label">Fire Behavior</p>
+  <div class="codes-grid" style="margin-bottom:14px;">
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">Flashover</span><span class="code-meaning">All combustible surfaces in a room ignite simultaneously — room temperature reaches 1,100°F+. Immediate warning: rollover (flames rolling at ceiling).</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">Backdraft</span><span class="code-meaning">Superheated oxygen-deprived fire erupts when fresh air introduced. Warning signs: puffing smoke, black oily smoke, blistering paint, heat without flames.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">Rollover</span><span class="code-meaning">Unburned gases at ceiling ignite in rolling flames — precursor to flashover. Get low; advance attack line immediately.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#D97706;font-size:10px;padding:0 6px;">LCES</span><span class="code-meaning"><strong>Lookout / Communications / Escape Routes / Safety Zones</strong> — wildland fire safety system; establish before any commitment</span></div>
+    <div class="code-row"><span class="code-num" style="background:#D97706;font-size:10px;padding:0 6px;">Fire Triangle</span><span class="code-meaning">Fuel + Heat + Oxygen — remove any one to extinguish. Water = removes heat. Foam = removes O₂ and fuel contact. CO₂ = removes O₂.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#D97706;font-size:10px;padding:0 6px;">Fire Tetrahedron</span><span class="code-meaning">Fuel + Heat + Oxygen + Chain Reaction — Halon/dry chemical interrupt the chain reaction to extinguish</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">BTU</span><span class="code-meaning"><strong>British Thermal Unit</strong> — unit of heat energy. Fire intensity measured in BTU/hr.</span></div>
+  </div>
+</div>
+
+<!-- FIRE: EQUIPMENT STATUS -->
+<div id="fire-equip" class="tab">
+  <p class="sec-label">Equipment working status — mark in/out of service</p>
+  <p style="font-size:12px;color:var(--color-text-2);margin:0 0 12px;line-height:1.6;">Track which equipment is operational. Items marked OUT are flagged for your IC and crew. Status is session-only and clears when the app is closed.</p>
+
+  <div id="fire-equip-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+  <button class="reset-btn" onclick="fireEquipReset()" style="margin-top:12px;">↺ Reset all to Working</button>
+</div>
+
+<!-- FIRE: RADIO & COMMS -->
+<div id="fire-radio" class="tab">
+  <p class="sec-label">Radio communications — fire ground</p>
+  <div class="grid2" style="margin-bottom:14px;">
+    <div class="card">
+      <h3>Radio format — NIMS standard</h3>
+      <ul style="font-size:12.5px;">
+        <li><strong>Who you're calling</strong> first, then your unit: <em>"Engine 2, Engine 1."</em></li>
+        <li><strong>Wait for acknowledgment</strong> before transmitting message</li>
+        <li>Keep transmissions brief — no unnecessary words</li>
+        <li>Repeat critical info back: <em>"Copy, proceeding to Division 2 Charlie."</em></li>
+        <li>Announce tactical benchmarks unprompted — don't wait for IC to ask</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Mayday transmission</h3>
+      <ul style="font-size:12.5px;">
+        <li>Transmit: <em>"MAYDAY MAYDAY MAYDAY"</em> three times</li>
+        <li>State: <strong>Unit / Name → Location → What happened → Air supply → Resources needed</strong></li>
+        <li>Activate PASS device</li>
+        <li>Move to safe area if possible — walls, corners</li>
+        <li>Conserve air — reduce movement</li>
+        <li>IC clears radio: <em>"All units — Mayday declared. Tactical channel 2 for all others."</em></li>
+      </ul>
+    </div>
+  </div>
+  <hr class="divider">
+  <p class="sec-label">Common fire ground radio calls</p>
+  <div class="codes-grid">
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">PAR</span><span class="code-meaning">Personnel Accountability Report — IC calls, all units respond with crew count</span></div>
+    <div class="code-row"><span class="code-num" style="background:#991B1B;font-size:10px;padding:0 6px;">MAYDAY</span><span class="code-meaning">Firefighter in distress — immediate priority traffic</span></div>
+    <div class="code-row"><span class="code-num" style="background:#EA580C;font-size:10px;padding:0 6px;">URGENT</span><span class="code-meaning">Important but not Mayday — safety concern or significant update</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">ALL CLEAR</span><span class="code-meaning">Primary search complete, no victims found in assigned area</span></div>
+    <div class="code-row"><span class="code-num" style="background:#059669;font-size:10px;padding:0 6px;">UNDER CONTROL</span><span class="code-meaning">Fire knocked — no longer spreading. Overhaul may begin.</span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;font-size:10px;padding:0 6px;">BENCHMARK</span><span class="code-meaning">Tactical milestone reached — report to IC immediately</span></div>
+    <div class="code-row"><span class="code-num" style="background:#2563EB;font-size:10px;padding:0 6px;">STAND BY</span><span class="code-meaning">Hold transmission — IC is busy / radio traffic pending</span></div>
+    <div class="code-row"><span class="code-num" style="background:#7C3AED;font-size:10px;padding:0 6px;">EVACUATION</span><span class="code-meaning">All crews out of structure immediately — IC-declared, backup signal sounds</span></div>
+  </div>
+
+  <hr class="divider">
+  <p class="sec-label">ICS position quick reference</p>
+  <div class="grid3">
+    <div class="card"><h3>Incident Commander (IC)</h3><p style="font-size:12px;margin:0;">Overall scene authority. Sets strategy, assigns sectors, calls PAR, declares Mayday response. Typically first-due officer until relieved by higher rank.</p></div>
+    <div class="card"><h3>Safety Officer</h3><p style="font-size:12px;margin:0;">Independent authority to stop unsafe operations. Reports directly to IC. Monitors structural integrity, PPE compliance, crew accountability.</p></div>
+    <div class="card"><h3>Division / Group Supervisor</h3><p style="font-size:12px;margin:0;">Manages resources in a geographic area (Division) or functional group. Reports to Operations Section or IC directly.</p></div>
+  </div>
+</div>
+
+</div><!-- /app-fire -->
+
 <!-- LEO INCIDENT REPORT WRITER — injected here as a sibling tab under app-leo -->
 <script>
 (function() {
@@ -3221,8 +3989,10 @@ var LA = (function() {
 function switchMode(m) {
   document.getElementById('app-ems').classList.toggle('visible', m==='ems');
   document.getElementById('app-leo').classList.toggle('visible', m==='leo');
+  document.getElementById('app-fire').classList.toggle('visible', m==='fire');
   document.getElementById('mode-ems').classList.toggle('active', m==='ems');
   document.getElementById('mode-leo').classList.toggle('active', m==='leo');
+  document.getElementById('mode-fire').classList.toggle('active', m==='fire');
   // Keep ALS/BLS toggle visible only when in EMS mode
   var taw = document.getElementById('tb-als-wrap');
   if (taw) taw.style.display = m==='ems' ? 'inline-flex' : 'none';
@@ -3268,6 +4038,90 @@ function leoScene(id, btn) {
   if (card) card.classList.add('vis');
   if (btn) btn.classList.add('active');
 }
+
+/* ═══════════════════════════════════════════════
+   FIRE TAB / SCENE NAV
+═══════════════════════════════════════════════ */
+function fireTab(id, btn) {
+  document.querySelectorAll('#app-fire .tab').forEach(function(t){t.classList.remove('visible');});
+  document.querySelectorAll('#fire-nav .nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('fire-'+id).classList.add('visible');
+  btn.classList.add('active');
+}
+function fireTeam(id, btn) {
+  document.querySelectorAll('#fire-teams .scene-card').forEach(function(c){c.classList.remove('vis');});
+  document.querySelectorAll('#fire-teams .scene-pills .spill').forEach(function(b){b.classList.remove('active');});
+  var card = document.getElementById('fire-team-'+id);
+  if (card) card.classList.add('vis');
+  if (btn) btn.classList.add('active');
+}
+function fireScene(id, btn) {
+  document.querySelectorAll('#fire-protocols .scene-card').forEach(function(c){c.classList.remove('vis');});
+  document.querySelectorAll('#fire-protocols .scene-pills .spill').forEach(function(b){b.classList.remove('active');});
+  var card = document.getElementById('fire-sc-'+id);
+  if (card) card.classList.add('vis');
+  if (btn) btn.classList.add('active');
+}
+
+/* ── Fire Equipment Status ── */
+var FIRE_EQUIPMENT = [
+  { id:'pump', label:'Pump / water supply system', category:'Apparatus' },
+  { id:'aerial', label:'Aerial / ladder (if equipped)', category:'Apparatus' },
+  { id:'foam', label:'Foam system', category:'Apparatus' },
+  { id:'thermal', label:'Thermal imaging camera (TIC)', category:'Tools' },
+  { id:'scba1', label:'SCBA unit 1', category:'Breathing Apparatus' },
+  { id:'scba2', label:'SCBA unit 2', category:'Breathing Apparatus' },
+  { id:'scba3', label:'SCBA unit 3', category:'Breathing Apparatus' },
+  { id:'scba4', label:'SCBA unit 4', category:'Breathing Apparatus' },
+  { id:'passdev', label:'PASS devices (all units)', category:'Safety' },
+  { id:'radio1', label:'Portable radio 1', category:'Comms' },
+  { id:'radio2', label:'Portable radio 2', category:'Comms' },
+  { id:'radio3', label:'Portable radio 3', category:'Comms' },
+  { id:'extrication', label:'Extrication / spreaders (jaws)', category:'Tools' },
+  { id:'throwrope', label:'Throw rope / water rescue bag', category:'Tools' },
+  { id:'chainsaw', label:'Chainsaw / ventilation saw', category:'Tools' },
+  { id:'hydraulicram', label:'Hydraulic ram / shoring', category:'Tools' },
+  { id:'atmos', label:'Atmospheric monitor (4-gas)', category:'HazMat' },
+  { id:'hazmatepm', label:'PPE Level B suits', category:'HazMat' },
+];
+var fireEquipStatus = {};
+
+function fireEquipInit() {
+  var container = document.getElementById('fire-equip-list');
+  if (!container) return;
+  var currentCat = '';
+  var html = '';
+  FIRE_EQUIPMENT.forEach(function(item) {
+    if (item.category !== currentCat) {
+      currentCat = item.category;
+      html += '<p class="sec-label" style="margin-top:10px;margin-bottom:4px;">' + currentCat + '</p>';
+    }
+    var status = fireEquipStatus[item.id] || 'working';
+    var isOut = (status === 'out');
+    html += '<div class="checklist-item" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;gap:12px;" id="feq-row-' + item.id + '">';
+    html += '<span style="flex:1;font-size:13px;' + (isOut ? 'color:#991B1B;font-weight:600;' : '') + '">' + (isOut ? '⚠️ ' : '✅ ') + item.label + '</span>';
+    html += '<div style="display:flex;gap:6px;">';
+    html += '<button onclick="fireEquipSet(\'' + item.id + '\',\'working\')" style="padding:4px 12px;font-size:11.5px;font-weight:700;border-radius:6px;cursor:pointer;font-family:var(--font-sans);border:1.5px solid ' + (!isOut ? '#059669' : 'var(--color-border-2)') + ';background:' + (!isOut ? '#059669' : 'transparent') + ';color:' + (!isOut ? '#fff' : 'var(--color-text-2)') + ';">Working</button>';
+    html += '<button onclick="fireEquipSet(\'' + item.id + '\',\'out\')" style="padding:4px 12px;font-size:11.5px;font-weight:700;border-radius:6px;cursor:pointer;font-family:var(--font-sans);border:1.5px solid ' + (isOut ? '#991B1B' : 'var(--color-border-2)') + ';background:' + (isOut ? '#991B1B' : 'transparent') + ';color:' + (isOut ? '#fff' : 'var(--color-text-2)') + ';">Out of Service</button>';
+    html += '</div></div>';
+  });
+  container.innerHTML = html;
+}
+
+function fireEquipSet(id, status) {
+  fireEquipStatus[id] = status;
+  fireEquipInit();
+}
+
+function fireEquipReset() {
+  fireEquipStatus = {};
+  fireEquipInit();
+}
+
+/* Init fire equipment panel when fire tab first opened */
+document.addEventListener('DOMContentLoaded', function() {
+  fireEquipInit();
+});
 
 /* ═══════════════════════════════════════════════
    EMS TRIAGE
@@ -4426,18 +5280,20 @@ function buildIndex(appId) {
   });
 
   /* ── Scene protocol cards — indexed as call types, not their individual prows ── */
-  if (appId === 'ems') {
+  if (appId === 'ems' || appId === 'fire') {
+    var pfx = appId === 'ems' ? 'ems-sc-' : 'fire-sc-';
+    var scClr = appId === 'fire' ? '#EA580C' : '#059669';
     app.querySelectorAll('.scene-card').forEach(function(card) {
       var h3 = card.querySelector('h3');
       if (!h3) return;
       var title    = h3.textContent.replace('📌','').trim();
-      var sceneId  = card.id.replace('ems-sc-','');
+      var sceneId  = card.id.replace(pfx,'');
       /* Build a short summary from the first two step names */
       var prows = card.querySelectorAll('.prow .ptxt strong');
       var steps = [];
       prows.forEach(function(s){ if(steps.length<2) steps.push(s.textContent.trim()); });
       var body = steps.join(' · ');
-      items.push({ type:'scene', title: title, body: body, tab:'protocols', el: card, sceneId: sceneId, color:'#059669', source:'Scene protocols' });
+      items.push({ type:'scene', title: title, body: body, tab:'protocols', el: card, sceneId: sceneId, color: scClr, source:'Scene protocols' });
     });
   }
 
@@ -4581,7 +5437,8 @@ function searchJump(appId, hitIdx, query) {
     if (tabBtn) tabBtn.click();
     setTimeout(function(){
       var sceneBtn = document.querySelector('#'+appId+'-protocols .spill[onclick*="\''+item.sceneId+'\'"]');
-      if (sceneBtn) emsScene(item.sceneId, sceneBtn);
+      var sceneFn = appId === 'fire' ? fireScene : emsScene;
+      if (sceneBtn) sceneFn(item.sceneId, sceneBtn);
       if (item.el) { setTimeout(function(){ item.el.scrollIntoView({behavior:'smooth',block:'start'}); }, 80); }
     }, 120);
     return;
@@ -5655,9 +6512,22 @@ function leoReportClear() {
   var wrap = document.getElementById('lr-output-wrap'); if (wrap) wrap.style.display = 'none';
 }
 
-var LARPAID_VERSION = '1.7.0';
+var LARPAID_VERSION = '1.8.0';
 
 var CHANGELOG = [
+  {
+    ver:   '1.8.0',
+    date:  'June 2026',
+    tags:  ['new'],
+    notes: [
+      { type:'new', text:'🔥 Fire section — GVFD / BFD added as a third mode alongside EMS and LEO.' },
+      { type:'new', text:'Scene Protocols — Structure Fire (offensive/transitional/defensive attack), Vehicle Fire, Wildland, Tech Rescue, Water Rescue, SAR, and HazMat.' },
+      { type:'new', text:'Specialized Teams tab — RIC, HazMat Team, Wildland Division, Tech Rescue Team, Swift Water/Dive, and SAR Team cards.' },
+      { type:'new', text:'HazMat reference — EPA/OSHA PPE levels A–D, extinguisher classes A/B/C/D/K, DOT placard classes 1–9, and 8 common material profiles.' },
+      { type:'new', text:'Abbreviations tab — 40+ fire/HazMat terms covering ICS, operations, HazMat, radiological, and fire behavior.' },
+      { type:'new', text:'Nav Aids, Equipment Status tracker, and Radio & Comms tab.' },
+    ]
+  },
   {
     ver:   '1.7.0',
     date:  'June 2026',
@@ -6002,7 +6872,7 @@ setInterval(checkForUpdates, 30 * 60 * 1000);
     <span class="footer-brand">LARP-AID</span>
     <button class="ver-badge" onclick="openVerModal()" title="View changelog" style="margin:0 4px;">
       <span class="ver-dot"></span>
-      <span class="ver-txt">v1.6.0</span>
+      <span class="ver-txt">v1.8.0</span>
     </button>
     <span class="footer-sep">&middot;</span>
     <span class="footer-credit">Built by <strong>B6verly</strong></span>
