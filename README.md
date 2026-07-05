@@ -1,7 +1,7 @@
 # LARP-AID
 **A desktop field reference tool for EMS, LEO, and Fire roles in the Greenville Roblox LARP.**
 Built for GVFD, BFD, WSP, and OCSO.
-![Version](https://img.shields.io/badge/version-v1.8.0-58a6ff?style=flat-square)
+![Version](https://img.shields.io/badge/version-v2.2.0-58a6ff?style=flat-square)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen?style=flat-square)
 ![Updates](https://img.shields.io/badge/auto--updates-enabled-3fb950?style=flat-square)
 
@@ -50,16 +50,15 @@ Starting with **v1.7.0**, LARP-AID updates itself. When you open the app, it sil
 
 ---
 
-## ✦ What's New in v1.8.0
+## ✦ What's New in v2.2.0
 
 | Type | Change |
 |------|--------|
-| 🆕 New | **🔥 Fire section** — GVFD / BFD added as a full third mode alongside EMS and LEO |
-| 🆕 New | **Scene Protocols** — Structure Fire (offensive/transitional/defensive attack), Vehicle Fire, Wildland, Tech Rescue, Water Rescue, SAR, and HazMat |
-| 🆕 New | **Specialized Teams tab** — dedicated cards for RIC, HazMat Team, Wildland Division, Tech Rescue Team, Swift Water/Dive Team, and SAR Team |
-| 🆕 New | **HazMat reference** — EPA/OSHA PPE levels A–D, extinguisher classes A/B/C/D/K, DOT placard classes 1–9, and 8 common material profiles |
-| 🆕 New | **Abbreviations tab** — 40+ fire/HazMat terms covering ICS, operations, radiological, and fire behavior |
-| 🆕 New | **Nav Aids, Equipment Status tracker, and Radio & Comms tab** |
+| ⬆️ Improved | **🚨 Active Call HUD rebuilt** — Decision Tree, Triage, Trauma, ACLS, Serial Vitals, and the Report Writer now open fully interactive **inside** the HUD. No panel kicks you back to the main app; everything you need during a call is at your fingertips |
+| 🆕 New | **📄 PCR panel in the HUD** — write and copy the full report without leaving the call screen |
+| 🆕 New | **▼ Hide button** — minimize the HUD to check the main app while the call and scene timer keep running; reopen from the topbar right where you left off |
+| ⬆️ Improved | **Pinned HUD panel bar** — the panel selector stays at the top; long content like the Trauma guide no longer scrolls it out of reach |
+| ⬆️ Improved | **🫁 Airway guide** (OPA vs NPA · BVM vs iGel · RSI procedure) moved from the bottom of the Medications tab to the Airway tab where it belongs |
 
 ---
 
@@ -67,6 +66,10 @@ Starting with **v1.7.0**, LARP-AID updates itself. When you open the app, it sil
 
 | Version | Highlights |
 |---------|-----------|
+| **v2.2.0** | 🚨 Active Call HUD rebuilt — all tools embedded in-HUD · PCR panel · Hide/minimize · Airway guide moved to Airway tab |
+| **v2.1.0** | Bug fixes — triage BG tile · penalty calculator · decision-tree pins · HUD shortcuts · search |
+| **v2.0.0** | 🪖 Roles tab (Firefighter role) · 🔧 Tools tab · Electrical fire scene card · Water Rescue expansion |
+| **v1.9.0** | RSI / Chemical Restraint medications · Airway Guide (OPA/NPA, BVM/iGel) · RSI procedure step-by-step |
 | **v1.8.0** | 🔥 Full Fire section (GVFD/BFD) · Scene protocols · Specialized Teams · HazMat reference · Abbreviations |
 | **v1.7.0** | Auto-updates · Animal Attacks · Burns & Anaphylaxis expansion · Triage calculator upgrade |
 | **v1.6.0** | LEO overhaul · MCI alert mode · Timers tab · Notepad · Report Writer |

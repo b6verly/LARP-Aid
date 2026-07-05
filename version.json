@@ -1,16 +1,12 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "date": "July 2026",
   "notes": [
-    "Roles tab — Firefighter role with fire behavior, PPE/SCBA, attack lines, and Mayday procedure",
-    "Tools tab — hand tools, hydraulic rescue tools, nozzles, hose sizes, TIC guide, ladders",
-    "Electrical fire scene card and expanded Water Rescue (submerged vehicle protocol)",
-    "Fixed: triage assessment showing a bogus 'BG NaN' vitals tile",
-    "Fixed: penalty calculator breaking after removing the last charge",
-    "Fixed: EMS decision-tree pin button not working",
-    "Fixed: decision-tree charge chips highlighting the wrong nav tab",
-    "Fixed: HUD shortcuts leaving tab navigation unhighlighted and skipping auto-fill",
-    "Fixed: search queries containing quotes breaking result links"
+    "Active Call HUD rebuilt — Decision Tree, Triage, Trauma, ACLS, Serial Vitals, and Report Writer now fully interactive inside the HUD",
+    "New PCR panel in the HUD — write and copy reports without leaving the call",
+    "New Hide button — minimize the HUD while the call and timer keep running",
+    "HUD panel bar stays pinned to the top on long content",
+    "Airway guide (OPA vs NPA, BVM vs iGel, RSI) moved to the Airway tab"
   ],
   "download_url": "https://raw.githubusercontent.com/b6verly/LARP-Aid/refs/heads/main/releases/larp_aid.html"
 }
