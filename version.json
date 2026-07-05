@@ -1,13 +1,16 @@
 {
-  "version": "1.8.0",
-  "date": "June 2026",
+  "version": "2.1.0",
+  "date": "July 2026",
   "notes": [
-    "Fire section added — GVFD / BFD as a full third mode",
-    "Scene protocols: Structure Fire, Vehicle Fire, Wildland, Tech Rescue, Water Rescue, SAR, HazMat",
-    "Specialized Teams tab — RIC, HazMat Team, Wildland Division, Tech Rescue, Swift Water/Dive, SAR",
-    "HazMat reference — PPE levels A–D, extinguisher classes, DOT placard classes, material profiles",
-    "Abbreviations tab — 40+ fire/HazMat terms",
-    "Nav Aids, Equipment Status tracker, Radio & Comms tab"
+    "Roles tab — Firefighter role with fire behavior, PPE/SCBA, attack lines, and Mayday procedure",
+    "Tools tab — hand tools, hydraulic rescue tools, nozzles, hose sizes, TIC guide, ladders",
+    "Electrical fire scene card and expanded Water Rescue (submerged vehicle protocol)",
+    "Fixed: triage assessment showing a bogus 'BG NaN' vitals tile",
+    "Fixed: penalty calculator breaking after removing the last charge",
+    "Fixed: EMS decision-tree pin button not working",
+    "Fixed: decision-tree charge chips highlighting the wrong nav tab",
+    "Fixed: HUD shortcuts leaving tab navigation unhighlighted and skipping auto-fill",
+    "Fixed: search queries containing quotes breaking result links"
   ],
   "download_url": "https://raw.githubusercontent.com/b6verly/LARP-Aid/refs/heads/main/releases/larp_aid.html"
 }
